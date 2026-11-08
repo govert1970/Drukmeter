@@ -3,7 +3,7 @@ import '../rapport.css';
 import { useCallback, useEffect, useState } from 'react';
 
 type Team = { id: string; naam: string; sessiedatum: string };
-type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null };
+type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null; notitie?: string };
 
 export default function Admin() {
   const [status, setStatus] = useState<'laden' | 'login' | 'ok'>('laden');
@@ -77,7 +77,13 @@ export default function Admin() {
             <tbody>
               {leden.map(d => (
                 <tr key={d.id}>
-                  <td>{d.naam}</td>
+                  <td>{d.naam}
+                    <details style={{ marginTop: 4 }}>
+                      <summary style={{ fontSize: 12, color: 'var(--muted)', cursor: 'pointer' }}>{d.notitie ? 'Toelichting ✓' : 'Toelichting toevoegen'}</summary>
+                      <textarea defaultValue={d.notitie || ''} placeholder="Persoonlijke toelichting voor het uitgebreide rapport" style={{ minHeight: 70, width: 320, fontFamily: 'inherit', fontSize: 13 }}
+                        onBlur={e => post('/api/admin/deelnemers', { id: d.id, notitie: e.target.value }, 'PATCH').then(() => { setMsg('Toelichting van ' + d.naam + ' opgeslagen.'); laad(); })} />
+                    </details>
+                  </td>
                   <td>{d.ingevuld_op ? <span className="band b-r">ingevuld {new Date(d.ingevuld_op).toLocaleDateString('nl-NL')}</span> : <span className="band b-v">nog niet</span>}</td>
                   <td style={{ fontSize: 11, color: 'var(--muted)', wordBreak: 'break-all' }}>{link(d.token)}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>

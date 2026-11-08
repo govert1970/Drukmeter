@@ -55,3 +55,39 @@
     .noprint { display:none !important; }
     body.only-team .page.ind, body.only-ind .page.team { display:none; }
   }
+
+/* Uitgebreid persoonlijk rapport */
+.page.ext { font-size:13.5px; line-height:1.5; }
+.page.ext p { margin:4px 0 8px; }
+.page.ext h1 { font-size:30px; margin-bottom:4px; }
+.page.ext h2 { font-size:18px; margin:16px 0 6px; }
+.page.ext h2.first { margin-top:4px; }
+.kicker { font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+.uitleg { margin:4px 0 6px 18px; } .uitleg li { margin:4px 0; }
+.overzicht { margin-top:6px; }
+.orow { display:grid; grid-template-columns:130px 1fr 110px; gap:12px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); }
+.orow .nm { font-weight:700; font-variant:small-caps; font-size:15px; }
+.samenv { background:#f6f7f9; border-left:4px solid var(--blue); padding:10px 14px; margin-top:14px; font-size:14px; }
+.dim { padding:10px 0 12px; border-bottom:1px solid var(--line); }
+.dimhead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+.dimhead h3 { font-size:18px; margin:0; }
+.dim .wat { color:var(--muted); font-size:12.5px; margin:8px 0 4px; }
+.antw { background:#f6f7f9; border-radius:8px; padding:8px 12px; margin-top:6px; font-size:12.5px; }
+.antw .a { margin:3px 0; }
+.antw .jij { font-weight:700; white-space:nowrap; margin-left:4px; }
+.antw .jij::before { content:"→ "; color:var(--muted); font-weight:400; }
+.lbl { display:block; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+.noot { border:1px solid var(--blue); border-radius:8px; padding:10px 14px; margin:12px 0; }
+.noot p { margin:2px 0 0; }
+.klein { font-size:12.5px; color:var(--muted); margin-top:-2px; }
+.vraag { margin:12px 0 4px; }
+.schaal { display:flex; gap:22px; margin-top:8px; font-size:13px; }
+.lijn { border-bottom:1px solid #c9ced6; height:24px; }
+@media print {
+  .page.ext { font-size:12.5px; line-height:1.45; padding:13mm 16mm 14mm; }
+  .page.ext h1 { font-size:27px; }
+  .page.ext h2 { font-size:16.5px; margin:12px 0 5px; }
+  .page.ext .foot { position:absolute; bottom:8mm; left:16mm; right:16mm; display:flex; justify-content:space-between; }
+  body.only-ext .page:not(.ext) { display:none; }
+}
+.page.ext .foot { display:flex; justify-content:space-between; gap:12px; }

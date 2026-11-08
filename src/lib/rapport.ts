@@ -1,4 +1,4 @@
-import { DIMS, ITEMS } from './items';
+import { DIMS, ITEMS, SCALES } from './items';
 
 export const TXT: Record<string, { hoog: string; tips: string[]; team: string; vraag: string }> = {
   T: { hoog: "Het werk zelf vraagt veel van je: volume, complexiteit of versnippering. De winst zit meestal in het beschermen van focustijd, niet in harder werken.",
@@ -40,7 +40,7 @@ export const TXT: Record<string, { hoog: string; tips: string[]; team: string; v
 };
 
 
-export type Persoon = { naam: string; open: string; raw: Record<string, number>; load: Record<string, number>; dims: Record<string, number> };
+export type Persoon = { naam: string; open: string; notitie?: string; raw: Record<string, number>; load: Record<string, number>; dims: Record<string, number> };
 export function scoreOf(o: { n: string; a: string; t?: string }): Persoon {
   const v: Record<string, number> = {}; ITEMS.forEach((it, i) => v[it.id] = +o.a[i]);
   const load = (id: string) => { const it = ITEMS.find(x => x.id === id)!; return it.rev ? 6 - v[id] : v[id]; };
@@ -53,12 +53,12 @@ export function scoreOf(o: { n: string; a: string; t?: string }): Persoon {
   return { naam: o.n, open: o.t || "", raw: v, load: Object.fromEntries(ITEMS.map(it => [it.id, load(it.id)])), dims };
 }
 
-function band(s: number) { return s >= 65 ? ["Zwaar", "b-z", "var(--orange)"] : s >= 40 ? ["Voelbaar", "b-v", "var(--yellow)"] : ["Ruimte", "b-r", "var(--green)"]; }
-function esc(s: string) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+export function band(s: number) { return s >= 65 ? ["Zwaar", "b-z", "var(--orange)"] : s >= 40 ? ["Voelbaar", "b-v", "var(--yellow)"] : ["Ruimte", "b-r", "var(--green)"]; }
+export function esc(s: string) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--blue)"></i></div>';
 const FOOT = 'Gespreksinstrument, geen gevalideerde test. Scores zijn een momentopname van de afgelopen vier weken. Time To Grow · Govert van Sandwijk';
 
-function teamMeans(people: Persoon[]) {
+export function teamMeans(people: Persoon[]) {
   const r: Record<string, number> = {}; DIMS.forEach(d => r[d.id] = Math.round(people.reduce((s, p) => s + p.dims[d.id], 0) / people.length)); return r;
 }
 

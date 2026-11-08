@@ -19,3 +19,12 @@ export async function DELETE(req: Request) {
   if (error) return json({ fout: 'Verwijderen lukte niet.' }, 500);
   return json({ ok: true });
 }
+
+export async function PATCH(req: Request) {
+  if (!isAdmin()) return json({ fout: 'Niet ingelogd.' }, 401);
+  const b = await req.json().catch(() => ({}));
+  const notitie = String(b.notitie ?? '').slice(0, 1500);
+  const { error } = await db().from('dm_deelnemers').update({ notitie }).eq('id', String(b.id ?? ''));
+  if (error) return json({ fout: 'Opslaan lukte niet.' }, 500);
+  return json({ ok: true });
+}
