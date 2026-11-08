@@ -55,7 +55,7 @@ export function scoreOf(o: { n: string; a: string; t?: string }): Persoon {
 
 export function band(s: number) { return s >= 65 ? ["Zwaar", "b-z", "var(--orange)"] : s >= 40 ? ["Voelbaar", "b-v", "var(--yellow)"] : ["Ruimte", "b-r", "var(--green)"]; }
 export function esc(s: string) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--blue)"></i></div>';
+const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--sky)"></i></div>';
 const FOOT = 'Gespreksinstrument, geen gevalideerde test. Scores zijn een momentopname van de afgelopen vier weken. Time To Grow · Govert van Sandwijk';
 
 export function teamMeans(people: Persoon[]) {

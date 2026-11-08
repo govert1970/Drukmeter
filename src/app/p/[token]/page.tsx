@@ -6,7 +6,7 @@ import { ITEMS, ORDER, SCALES } from '@/lib/items';
 type Fase = 'laden' | 'fout' | 'intro' | 'vragen' | 'klaar';
 
 const Dots = () => (
-  <div className="dots"><i style={{ background: 'var(--orange)' }} /><i style={{ background: 'var(--green)' }} /><i style={{ background: 'var(--yellow)' }} /><i style={{ background: 'var(--blue)' }} /></div>
+  <div className="dots"><i style={{ background: 'var(--orange)' }} /><i style={{ background: 'var(--green)' }} /><i style={{ background: 'var(--yellow)' }} /><i style={{ background: 'var(--sky)' }} /></div>
 );
 
 export default function Vragenlijst({ params }: { params: { token: string } }) {

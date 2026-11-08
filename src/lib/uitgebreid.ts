@@ -35,7 +35,7 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
   }
 };
 
-const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--blue)"></i></div>';
+const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--sky)"></i></div>';
 
 function foot(p: Persoon, nr: number, totaal: number) {
   return `<div class="foot"><span>Waar zit je druk? · ${esc(p.naam)} · Gespreksinstrument, geen gevalideerde test.</span><span>Time To Grow · Govert van Sandwijk · ${nr}/${totaal}</span></div>`;
@@ -78,12 +78,12 @@ function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
 function voorblad(p: Persoon, team: string, datum: string) {
   const voornaam = esc(p.naam.split(' ')[0]);
   return `<div class="page ext cover">
-    <div class="cv-top">${dots}<span>Time To Grow</span></div>
+    <img class="cv-logo" src="/ttg-logo.png" alt="Time To Grow">
     <svg class="cv-art" viewBox="0 0 600 600" aria-hidden="true">
-      <circle cx="390" cy="200" r="150" fill="#E8772E"/>
-      <circle cx="170" cy="350" r="100" fill="#6BAA45"/>
-      <circle cx="440" cy="450" r="80" fill="#2F6DB5"/>
-      <circle cx="190" cy="160" r="45" fill="#F2C230"/>
+      <circle cx="390" cy="200" r="150" fill="#EB7A2C"/>
+      <circle cx="170" cy="350" r="100" fill="#8ABA40"/>
+      <circle cx="440" cy="450" r="80" fill="#71C0E8"/>
+      <circle cx="190" cy="160" r="45" fill="#F5D508"/>
     </svg>
     <div class="cv-title">
       <div class="kicker">Persoonlijk profiel</div>

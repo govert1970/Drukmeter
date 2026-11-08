@@ -53,7 +53,7 @@ export default function Admin() {
 
   return (
     <div className="ctrl" style={{ maxWidth: 900 }}>
-      <div className="dots"><i style={{ background: 'var(--orange)' }} /><i style={{ background: 'var(--green)' }} /><i style={{ background: 'var(--yellow)' }} /><i style={{ background: 'var(--blue)' }} /></div>
+      <div className="dots"><i style={{ background: 'var(--orange)' }} /><i style={{ background: 'var(--green)' }} /><i style={{ background: 'var(--yellow)' }} /><i style={{ background: 'var(--sky)' }} /></div>
       <h1>Waar zit je druk? — facilitator</h1>
 
       <div className="row">

@@ -1,5 +1,5 @@
 
-  :root { --ink:#1d2430; --muted:#5b6575; --line:#e3e6eb; --blue:#2F6DB5; --orange:#E8772E; --green:#6BAA45; --yellow:#F2C230; }
+  :root { --ink:#1d2430; --muted:#5b6575; --line:#e3e6eb; --blue:#3A87B8; --sky:#71C0E8; --orange:#EB7A2C; --green:#8ABA40; --yellow:#F5D508; }
   * { box-sizing:border-box; }
   body { margin:0; font-family: Corbel, "Segoe UI", Candara, "Helvetica Neue", Arial, sans-serif; color:var(--ink); background:#eef0f3; font-size:14px; line-height:1.45; }
   h1, h2, h3 { font-variant:small-caps; letter-spacing:.02em; margin:0 0 .35em; }
@@ -67,7 +67,7 @@
 .overzicht { margin-top:6px; }
 .orow { display:grid; grid-template-columns:130px 1fr 110px; gap:12px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); }
 .orow .nm { font-weight:700; font-variant:small-caps; font-size:15px; }
-.samenv { background:#f6f7f9; border-left:4px solid var(--blue); padding:10px 14px; margin-top:14px; font-size:14px; }
+.samenv { background:#f6f7f9; border-left:4px solid var(--sky); padding:10px 14px; margin-top:14px; font-size:14px; }
 .dim { padding:10px 0 12px; border-bottom:1px solid var(--line); }
 .dimhead { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
 .dimhead h3 { font-size:18px; margin:0; }
@@ -94,6 +94,7 @@
 
 /* Voorblad */
 .page.cover { padding:0 !important; overflow:hidden; background:#fff; }
+.cv-logo { position:absolute; top:11mm; left:15mm; width:32mm; }
 .cv-top { position:absolute; top:16mm; left:18mm; display:flex; align-items:center; gap:12px; font-variant:small-caps; letter-spacing:.06em; font-weight:700; font-size:15px; color:var(--ink); }
 .cv-top .dots { margin:0; }
 .cv-art { position:absolute; top:22mm; right:-28mm; width:150mm; height:150mm; }

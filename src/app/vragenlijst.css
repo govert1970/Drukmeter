@@ -1,5 +1,5 @@
 
-  :root { --ink:#1d2430; --muted:#5b6575; --line:#e3e6eb; --blue:#2F6DB5; --orange:#E8772E; --green:#6BAA45; --yellow:#F2C230; --bg:#fafaf8; }
+  :root { --ink:#1d2430; --muted:#5b6575; --line:#e3e6eb; --blue:#3A87B8; --sky:#71C0E8; --orange:#EB7A2C; --green:#8ABA40; --yellow:#F5D508; --bg:#fafaf8; }
   * { box-sizing:border-box; }
   body { margin:0; font-family: Corbel, "Segoe UI", Candara, "Helvetica Neue", Arial, sans-serif; color:var(--ink); background:var(--bg); font-size:17px; line-height:1.5; }
   .wrap { max-width:720px; margin:0 auto; padding:28px 18px 80px; }
@@ -21,7 +21,7 @@
   .opts { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
   .opts label { display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px; padding:8px 4px; border:1px solid var(--line); border-radius:8px; cursor:pointer; font-size:.8rem; line-height:1.2; color:var(--muted); min-height:64px; justify-content:center; }
   .opts input { position:absolute; opacity:0; pointer-events:none; }
-  .opts label:has(input:checked) { border-color:var(--blue); background:#eaf1fa; color:var(--ink); font-weight:600; }
+  .opts label:has(input:checked) { border-color:var(--blue); background:#e8f4fb; color:var(--ink); font-weight:600; }
   .opts label:hover { border-color:#b9c3d0; }
   @media (max-width:560px) {
     .opts { grid-template-columns:1fr; }
@@ -39,5 +39,5 @@
   .hide { display:none; }
   .row { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
   a { color:var(--blue); }
-  .opts label.on { border-color:var(--blue); background:#eaf1fa; color:var(--ink); font-weight:600; }
+  .opts label.on { border-color:var(--blue); background:#e8f4fb; color:var(--ink); font-weight:600; }
   button:disabled { opacity:.6; cursor:default; }
