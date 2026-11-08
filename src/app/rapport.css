@@ -106,3 +106,5 @@
 .cv-meta { font-size:15px; color:var(--muted); margin-top:2px; }
 .cv-foot { position:absolute; left:18mm; right:18mm; bottom:14mm; display:flex; justify-content:space-between; font-size:11px; color:var(--muted); letter-spacing:.02em; }
 @media print { .page.cover { padding:0 !important; } }
+.antw.goed { background:#eef6ea; }
+.win.bron { border-left-color:var(--green); }

@@ -62,9 +62,14 @@ function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
     ${balk(s, tm ? tm[dId] : null)}
     <p class="wat">${d.wat}</p>
     <p>${tekst}</p>`;
-  if (zwaar.length) {
-    h += `<div class="antw"><span class="lbl">Wat je aangaf</span>` + zwaar.map(it =>
-      `<div class="a">“${esc(it.q)}” <span class="jij">${SCALES[it.s][p.raw[it.id] - 1].toLowerCase()}</span></div>`).join('') + `</div>`;
+  const regel = (it: typeof ITEMS[number]) =>
+    `<div class="a">“${esc(it.q)}” <span class="jij">${SCALES[it.s][p.raw[it.id] - 1].toLowerCase()}</span></div>`;
+  if (s < 40) {
+    const goed = ITEMS.filter(it => it.d === dId && p.load[it.id] <= 2)
+      .sort((a, b) => p.load[a.id] - p.load[b.id]).slice(0, 2);
+    if (goed.length) h += `<div class="antw goed"><span class="lbl">Wat goed gaat</span>` + goed.map(regel).join('') + `</div>`;
+  } else if (zwaar.length) {
+    h += `<div class="antw"><span class="lbl">Wat je aangaf</span>` + zwaar.map(regel).join('') + `</div>`;
   }
   return h + `</div>`;
 }
@@ -104,8 +109,11 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
   const voornaam = esc(p.naam.split(' ')[0]);
   const T = 4; // genummerde pagina's na het voorblad
 
+  const nergensZwaar = gesorteerd[0].s < 65;
   let samenvatting = top.length
-    ? `Bij jou zit de meeste druk in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`
+    ? (nergensZwaar
+      ? `Bij jou is geen enkel vlak zwaar. Relatief de meeste druk zit in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`
+      : `Bij jou zit de meeste druk in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`)
     : `Bij jou springt geen vlak eruit: de druk is redelijk verdeeld en nergens zwaar.`;
   if (ruimte.length) samenvatting += ` De meeste ruimte zit in <b>${lijst(ruimte.slice(-2).reverse().map(x => x.d.naam.toLowerCase()))}</b>.`;
   if (p.dims.H >= 65) samenvatting += ` Let vooral op je herstel: dat is het vlak waar de rest op leunt.`;
@@ -139,10 +147,14 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
 
   // Pagina 4: winst, werk/privé, toelichting, terugkoppeling
   h += `<div class="page ext">${dots}<h2 class="first">Hier zit de meeste winst</h2>`;
+  if (top.length && nergensZwaar) h += `<p>Niets is bij jou zwaar. Zie dit dus als onderhoud, geen reparatie: kleine dingen die voorkomen dat deze vlakken oplopen als het drukker wordt.</p>`;
   if (!top.length) h += `<p>Geen vlak springt eruit. Kijk vooral naar wat je nu goed doet: dat wil je vasthouden als de druk toeneemt.</p>`;
   top.forEach(({ d, s }) => {
     h += `<div class="win"><h3>${d.naam} · ${s}</h3><ul>${TXT[d.id].tips.map(t => `<li>${t}</li>`).join('')}</ul></div>`;
   });
+  if (ruimte.length) {
+    h += `<div class="win bron"><h3>Wat je vasthoudt</h3><p>${(t => t.charAt(0).toUpperCase() + t.slice(1))(lijst(ruimte.map(x => x.d.naam.toLowerCase())))} ${ruimte.length === 1 ? 'is' : 'zijn'} op dit moment een bron van ruimte. Als de druk toeneemt, zijn dit de vlakken die je wilt beschermen. Wat doe je hier nu dat werkt, en wat zou je als eerste laten vallen als het druk wordt?</p></div>`;
+  }
   if (p.raw.O5 >= 4 || p.raw.V6 >= 4) {
     const delen: string[] = [];
     if (p.raw.O5 >= 4) delen.push('werk en privé bij jou om dezelfde tijd en energie concurreren');
