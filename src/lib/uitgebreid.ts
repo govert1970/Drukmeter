@@ -69,13 +69,40 @@ function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
   return h + `</div>`;
 }
 
+
+function voorblad(p: Persoon, team: string, datum: string) {
+  const voornaam = esc(p.naam.split(' ')[0]);
+  return `<div class="page ext cover">
+    <div class="cv-top">${dots}<span>Time To Grow</span></div>
+    <svg class="cv-art" viewBox="0 0 600 600" aria-hidden="true">
+      <circle cx="390" cy="200" r="150" fill="#E8772E"/>
+      <circle cx="170" cy="350" r="100" fill="#6BAA45"/>
+      <circle cx="440" cy="450" r="80" fill="#2F6DB5"/>
+      <circle cx="190" cy="160" r="45" fill="#F2C230"/>
+    </svg>
+    <div class="cv-title">
+      <div class="kicker">Persoonlijk profiel</div>
+      <h1>Waar zit<br>je druk?</h1>
+      <p class="cv-sub">Een beeld van waar de druk zich bij jou ophoopt, en of je herstel het bijhoudt.</p>
+    </div>
+    <div class="cv-who">
+      <div class="cv-naam">${esc(p.naam)}</div>
+      <div class="cv-meta">${team ? esc(team) : ''}${team && datum ? ' · ' : ''}${datum ? esc(datum) : ''}</div>
+    </div>
+    <div class="cv-foot">
+      <span>Vertrouwelijk · alleen voor ${voornaam}</span>
+      <span>Govert van Sandwijk · Time To Grow</span>
+    </div>
+  </div>`;
+}
+
 export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: string, datum: string): string {
   const tm = people.length >= 4 ? teamMeans(people) : null;
   const gesorteerd = DIMS.map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s);
   const top = gesorteerd.filter(x => x.s >= 40).slice(0, 2);
   const ruimte = gesorteerd.filter(x => x.s < 40);
   const voornaam = esc(p.naam.split(' ')[0]);
-  const T = 4;
+  const T = 4; // genummerde pagina's na het voorblad
 
   let samenvatting = top.length
     ? `Bij jou zit de meeste druk in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`
@@ -83,12 +110,9 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
   if (ruimte.length) samenvatting += ` De meeste ruimte zit in <b>${lijst(ruimte.slice(-2).reverse().map(x => x.d.naam.toLowerCase()))}</b>.`;
   if (p.dims.H >= 65) samenvatting += ` Let vooral op je herstel: dat is het vlak waar de rest op leunt.`;
 
-  // Pagina 1: uitleg en overzicht
-  let h = `<div class="page ext">${dots}
-    <div class="kicker">Persoonlijk profiel</div>
-    <h1>Waar zit je druk?</h1>
-    <div class="meta">${esc(p.naam)}${team ? ' · ' + esc(team) : ''}${datum ? ' · ' + esc(datum) : ''}</div>
-    <h2>Waarom deze vragenlijst</h2>
+  // Voorblad, daarna pagina 1: uitleg en overzicht
+  let h = voorblad(p, team, datum) + `<div class="page ext">${dots}
+    <h2 class="first">Waarom deze vragenlijst</h2>
     <p>Druk hoort bij een rol in een directieteam. De vraag is dus niet óf je druk ervaart, maar waar die zich ophoopt en of je herstel het bijhoudt. Druk wordt pas een probleem als hij zich op één plek opstapelt, of als je niet meer bijtankt.</p>
     <p>De vragenlijst kijkt naar zes vlakken. Vier gaan over wat er op je afkomt: het werk zelf, beslissingen, mensen en rollen. Eén gaat over hoe goed je herstelt. En één over wat onder de oppervlakte meeloopt.</p>
     <h2>Hoe je dit leest</h2>

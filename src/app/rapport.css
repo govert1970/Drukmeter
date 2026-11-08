@@ -91,3 +91,18 @@
   body.only-ext .page:not(.ext) { display:none; }
 }
 .page.ext .foot { display:flex; justify-content:space-between; gap:12px; }
+
+/* Voorblad */
+.page.cover { padding:0 !important; overflow:hidden; background:#fff; }
+.cv-top { position:absolute; top:16mm; left:18mm; display:flex; align-items:center; gap:12px; font-variant:small-caps; letter-spacing:.06em; font-weight:700; font-size:15px; color:var(--ink); }
+.cv-top .dots { margin:0; }
+.cv-art { position:absolute; top:22mm; right:-28mm; width:150mm; height:150mm; }
+.cv-title { position:absolute; left:18mm; top:150mm; right:18mm; }
+.cv-title .kicker { font-size:12px; margin-bottom:8px; }
+.cv-title h1 { font-size:58px !important; line-height:1.0; font-variant:small-caps; letter-spacing:.01em; margin:0 0 14px; }
+.cv-sub { font-size:16px; color:var(--muted); max-width:120mm; margin:0; }
+.cv-who { position:absolute; left:18mm; right:18mm; bottom:34mm; border-top:3px solid var(--ink); padding-top:10px; }
+.cv-naam { font-size:26px; font-weight:700; }
+.cv-meta { font-size:15px; color:var(--muted); margin-top:2px; }
+.cv-foot { position:absolute; left:18mm; right:18mm; bottom:14mm; display:flex; justify-content:space-between; font-size:11px; color:var(--muted); letter-spacing:.02em; }
+@media print { .page.cover { padding:0 !important; } }
