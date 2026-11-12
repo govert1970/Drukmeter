@@ -32,7 +32,7 @@ export const TXT: Record<string, { hoog: string; tips: string[]; team: string; v
               "Plan herstel in je agenda zoals je werk plant. Een weekend dat volloopt met inhalen, is geen herstel."],
        team: "Maak afspraken over bereikbaarheid buiten werktijd, en houd je er als directie zelf aan. De organisatie kijkt naar jullie.",
        vraag: "Welke norm over bereikbaarheid hanteren we stilzwijgend?" },
-  G: { hoog: "Je kunt zelf weinig bijsturen. Dat maakt dezelfde druk zwaarder.",
+  G: { hoog: "Je kunt zelf weinig bijsturen. Dat telt apart mee in hoe je druk volhoudt.",
        tips: [],
        team: "Spreek af wat ieder zelf mag beslissen zonder afstemming, en wat ieder mag weigeren of doorschuiven.",
        vraag: "Waar geven we elkaar minder ruimte dan nodig is?" },
@@ -161,8 +161,8 @@ export function balans(p: Persoon) {
     : tekort
     ? ["Het zit niet in de hoeveelheid werk", "De belasting vanuit het werk is niet uitzonderlijk, maar je herstelt toch te weinig. De oorzaak ligt dan ergens anders."]
     : ["Ruimte", "De belasting is te dragen en je herstelt goed. Je hebt reserve. De vraag is waar je die voor wilt gebruiken."];
-  if (hoog && p.dims.G >= 55) tekst += " Je hebt daarbij weinig regelruimte. Dat maakt dezelfde druk zwaarder, want je kunt zelf weinig bijsturen.";
-  if (hoog && p.dims.G < 40) tekst += " Je hebt wel veel regelruimte: je kunt zelf bijsturen, en dat maakt veel druk beter te dragen.";
+  if (hoog && p.dims.G >= 55) tekst += " Je hebt daarbij weinig regelruimte. Dat telt apart mee: wie weinig kan bijsturen, houdt druk doorgaans minder goed vol.";
+  if (hoog && p.dims.G < 40) tekst += " Je hebt wel veel regelruimte. Dat is een hulpbron op zich: je kunt zelf bijsturen.";
   if (!hoog && tekort) tekst += p.dims.P >= 50 ? " Bij jou vraagt privé op dit moment veel, en dat telt mee in je herstel." : p.dims.G >= 55 ? " Bij jou is de regelruimte krap: weinig kunnen bijsturen kost ook energie." : " Kijk naar wat onder de oppervlakte meeloopt.";
   if (Math.abs(B - 50) < 6 || Math.abs(H - 50) < 6) tekst += " Je zit dicht bij een overgang: lees dit als richting, niet als uitkomst.";
   return { B, H, kop, tekst };
@@ -193,6 +193,13 @@ export function priveBlok(p: Persoon): string {
   return '<div class="box"><b>Privé.</b> Ook thuis komt er op dit moment veel op je af' + (waar.length ? ', vooral in ' + lijst : '') + '. Dat telt mee in wat je kunt dragen. Het team ziet dit niet: jij bepaalt wat je ervan deelt.</div>';
 }
 
+// Samenloop van werk en privé, in twee richtingen. Geen score: alleen benoemen wat iemand zelf aangaf.
+export function samenloop(p: Persoon): string {
+  const w = p.raw.S1 >= 4, t = p.raw.S2 >= 4;
+  if (!w && !t) return '';
+  return '<div class="box"><b>Werk en thuis.</b> ' + (w && t ? 'Je geeft aan dat je werk ten koste gaat van thuis, en dat wat er thuis speelt ten koste gaat van je aandacht op het werk. Het loopt dus in beide richtingen door.' : w ? 'Je geeft aan dat je werk ten koste gaat van de tijd en energie die je thuis nodig hebt.' : 'Je geeft aan dat wat er thuis speelt ten koste gaat van je aandacht op het werk.') + '</div>';
+}
+
 export function rijen(p: Persoon, tm: Record<string, number> | null) {
   return GROEPEN.map(g => '<div class="groep">' + g.kop + '</div>' + g.ids.map(id => {
     const d = DIMS.find(x => x.id === id)!;
@@ -210,7 +217,7 @@ export function teamCijfers(people: Persoon[]) {
     return { d, rev, stippen: sc.map(pos), gem: pos(tm[d.id]), laag: Math.min(pos(lo), pos(hi)), hoog: Math.max(pos(lo), pos(hi)), zwaar,
       gedeeld: zwaar >= n / 2 || tm[d.id] >= 60, uiteenlopend: hi - lo >= 40, last: tm[d.id] };
   });
-  const herkenning = ITEMS.filter(x => x.d !== 'P').map(x => ({ q: x.q, rev: !!x.rev, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
+  const herkenning = ITEMS.filter(x => x.d !== 'P' && x.id !== 'S2').map(x => ({ q: x.q, rev: !!x.rev, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
   const pr = people.filter(p => p.dims.P >= 50).length;
   const gedeeld = rijen.filter(r => r.gedeeld);
   const focus = (gedeeld.length ? gedeeld : rijen.slice().sort((a, b) => b.last - a.last).slice(0, 2)).slice(0, 3).map(r => ({ naam: r.d.naam, vraag: TXT[r.d.id].vraag, afspraak: TXT[r.d.id].team }));

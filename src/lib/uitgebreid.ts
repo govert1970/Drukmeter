@@ -1,5 +1,5 @@
 import { DIMS, ITEMS, SCALES, WERK } from './items';
-import { esc, teamMeans, balans, balansSvg, tipsVoor, winstVlakken, balk, scoreHtml, toon, rijen, type Persoon } from './rapport';
+import { esc, teamMeans, balans, balansSvg, tipsVoor, winstVlakken, samenloop, balk, scoreHtml, toon, rijen, type Persoon } from './rapport';
 
 // Betekenis per vlak en per band: zwaar (≥65), voelbaar (40–64), ruimte (<40)
 const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
@@ -9,7 +9,7 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
     r: 'Het werk zelf is op dit moment goed te dragen. Je hebt blijkbaar genoeg focustijd, of je houdt je agenda goed in de hand.'
   },
   D: {
-    z: 'Je draagt veel beslissingen, en een deel daarvan hoeft niet bij jou te liggen. Elke beslissing put uit dezelfde voorraad energie, groot of klein. Aan het eind van de dag merk je dat.',
+    z: 'Je draagt veel beslissingen, en een deel daarvan hoeft niet bij jou te liggen. Veel beslissen op een dag vraagt aandacht, ook als de beslissingen klein zijn. Aan het eind van de dag merk je dat.',
     v: 'Je neemt veel beslissingen, maar het blijft hanteerbaar. Kijk vooral naar wat je uitstelt: een uitgesteld besluit weegt mee, ook als je er niet aan werkt.',
     r: 'Beslissen kost je op dit moment weinig extra. Waarschijnlijk is het goed belegd, of zijn de besluiten nu helder.'
   },
@@ -29,9 +29,9 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
     r: 'Privé vraagt op dit moment weinig extra van je. Dat is ruimte die je op het werk kunt gebruiken, of juist wilt beschermen.'
   },
   G: {
-    z: 'Je kunt zelf weinig bijsturen: je agenda wordt voor je gevuld, nee zeggen kost je iets of overdragen lukt niet. Dat maakt dezelfde hoeveelheid druk zwaarder. Druk waar je invloed op hebt, draag je makkelijker dan druk die je overkomt.',
+    z: 'Je kunt zelf weinig bijsturen: je agenda wordt voor je gevuld, nee zeggen kost je iets of overdragen lukt niet. Weinig regelruimte hangt samen met meer klachten, los van hoeveel er op je afkomt.',
     v: 'Je kunt deels zelf bijsturen. Op sommige punten heb je ruimte, op andere niet. Kijk hieronder waar het knelt.',
-    r: 'Je kunt goed zelf bijsturen: je bepaalt veel zelf en je kunt terugvallen op anderen. Dat is je belangrijkste hulpbron. Veel druk is beter te dragen als je er invloed op hebt.'
+    r: 'Je kunt goed zelf bijsturen: je bepaalt veel zelf en je kunt terugvallen op anderen. Dat is een hulpbron op zich, los van hoeveel er op je afkomt.'
   },
   H: {
     z: 'Je herstel houdt de druk niet bij: je slaapt te weinig, wordt niet uitgerust wakker of hebt aan het eind van de dag niets meer over. Op dit vlak leunt alles. Bij een tekort worden de andere vlakken vanzelf zwaarder.',
@@ -131,7 +131,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
       <p class="klein">De druk zelf. Op het werk komt die in vier soorten, en thuis komt er ook het nodige op je af.</p>
       ${['T', 'D', 'R', 'O', 'P'].map(def).join('')}</div>
     <div class="laag"><div class="laagkop"><i style="background:var(--green)"></i>2 · Wat je ermee kunt</div>
-      <p class="klein">Dezelfde druk weegt minder als je er invloed op hebt.</p>
+      <p class="klein">Hoeveel je zelf kunt bijsturen, telt apart mee in hoe je druk volhoudt.</p>
       ${def('G')}</div>
     <div class="laag"><div class="laagkop"><i style="background:var(--sky)"></i>3 · Wat het met je doet</div>
       <p class="klein">Waar je aan merkt of je het volhoudt.</p>
@@ -155,7 +155,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
     <div class="balansrij">${balansSvg(tm ? people : [p], p)}<div><p><b>${bal.kop}.</b> ${bal.tekst}</p><p class="klein">De grote stip ben jij${tm ? ', de lichte stippen zijn je teamgenoten, zonder naam' : ''}. Horizontaal: wat er op het werk op je afkomt. Verticaal: je hersteltekort.</p></div></div>
     <h2>Wat er op je afkomt · werk</h2>` + werk.slice(0, 2).map(id => dimDetail(p, id, tm)).join('') + foot(p, 3, T) + `</div>`;
   h += `<div class="page ext">${dots}` + werk.slice(2).map(id => dimDetail(p, id, tm)).join('') +
-    `<h2>Wat er op je afkomt · privé</h2>` + dimDetail(p, 'P', tm) + foot(p, 4, T) + `</div>`;
+    `<h2>Wat er op je afkomt · privé</h2>` + dimDetail(p, 'P', tm) + samenloop(p) + foot(p, 4, T) + `</div>`;
   h += `<div class="page ext">${dots}<h2 class="first">Wat je ermee kunt</h2>` + dimDetail(p, 'G', tm) +
     `<h2>Wat het met je doet</h2>` + ['H', 'V'].sort((a, b) => p.dims[b] - p.dims[a]).map(id => dimDetail(p, id, tm)).join('') + foot(p, 5, T) + `</div>`;
 

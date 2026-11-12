@@ -2,7 +2,7 @@
 // Drie lagen: wat er op je afkomt (werk: T, D, R, O; privé: P), wat je ermee kunt (regelruimte: G),
 // wat het met je doet (hersteltekort: H, verborgen last: V).
 // Verhoog dit nummer bij elke wijziging in de vragen: referentiedata is alleen binnen één versie vergelijkbaar.
-export const ITEMPOOL_VERSIE = '0.3';
+export const ITEMPOOL_VERSIE = '0.4';
 
 export const SCALES: Record<string, string[]> = {
   W: ["Helemaal niet waar", "Nauwelijks waar", "Deels waar", "Grotendeels waar", "Helemaal waar"],
@@ -64,6 +64,11 @@ export const ITEMS: Item[] = [
   { id: "P3", d: "P", s: "W", q: "Er is privé een relatie die me op dit moment veel energie kost." },
   { id: "P4", d: "P", s: "W", q: "Privé verwachten mensen meer van me dan ik nu kan geven." },
 
+  // Samenloop werk en privé (d: "S"): twee losse vragen, geen vlak. Het onderzoek naar werk en privé gaat over
+  // de botsing tussen beide, in twee richtingen; de privélast hierboven meet alleen wat er thuis op je afkomt.
+  { id: "S1", d: "S", s: "W", q: "Mijn werk gaat ten koste van de tijd en energie die ik thuis nodig heb." },
+  { id: "S2", d: "S", s: "W", q: "Wat er thuis speelt, gaat ten koste van mijn aandacht op het werk." },
+
   { id: "G1", d: "G", s: "W", rev: true, q: "Ik bepaal grotendeels zelf hoe mijn agenda eruitziet." },
   { id: "G2", d: "G", s: "W", rev: true, q: "Ik kan nee zeggen tegen een verzoek zonder dat het me iets kost." },
   { id: "G3", d: "G", s: "W", rev: true, q: "Ik bepaal zelf hoe ik mijn werk aanpak." },
@@ -83,8 +88,8 @@ export const ITEMS: Item[] = [
   { id: "V5", d: "V", s: "W", q: "In mijn rol voel ik dat ik iemand moet zijn die ik niet helemaal ben." }
 ];
 
-// Vaste, gemengde volgorde zodat vlakken niet herkenbaar in blokken staan. De vier privévragen staan bij elkaar aan het eind.
+// Vaste, gemengde volgorde zodat vlakken niet herkenbaar in blokken staan. De zes vragen over privé staan bij elkaar aan het eind.
 export const ORDER: string[] = [
   "T1","R1","H1","D1","O1","G1","V1","T3","R2","D2","H2","O2","G2","V2","T2","D3","R3","H3","O3","G3","V3",
-  "T4","D4","R4","H4","O4","G4","V4","T5","D5","R5","H5","O5","G5","V5","P1","P2","P3","P4"
+  "T4","D4","R4","H4","O4","G4","V4","T5","D5","R5","H5","O5","G5","V5","P1","P2","P3","P4","S1","S2"
 ];

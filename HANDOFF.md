@@ -45,6 +45,12 @@ Dit vervangt de indeling in zes vlakken die hierboven staat.
 - **Het teambeeld is een PowerPoint** (`src/lib/teamdeck.ts`, pptxgenjs, draait in de browser van de facilitator). Tien dia's: titel, uitgangspunt, kader, eerst je eigen beeld, teambeeld werk, regelruimte/herstel/verborgen last, belasting tegenover herstel, herkenning, gespreksvragen, afspraken. Zonder namen en zonder privé. Pas beschikbaar vanaf vier deelnemers.
 - `next.config.mjs` bevat een webpack-aanpassing omdat pptxgenjs naar `node:fs` verwijst.
 
+## Onderzoeksbasis en itempool v0.4
+- De onderbouwing van regelruimte en van werk en privé staat in het projectdocument `claude/unload-science-base-AMENDMENT-01.md`.
+- Naar aanleiding daarvan: twee losse vragen over de samenloop van werk en thuis (S1 werk→thuis, S2 thuis→werk), niet gescoord in een vlak; S2 komt niet in het teambeeld. In totaal 41 vragen.
+- De rapporttekst beweert niet meer dat regelruimte dezelfde druk lichter maakt (zwak bewijs), alleen dat regelruimte apart meetelt (sterk bewijs).
+- Beide toevoegingen zijn op theorie gebaseerd en nog niet met eigen data bevestigd.
+
 ## Referentiegroep
 - Onder de vragenlijst staat een vinkje, standaard uit. Met toestemming gaat één kopie van de 39 antwoorden naar `dm_referentie`: alleen itempoolversie, maand en antwoorden. Geen naam, team, open tekst of tijdstempel.
 - `ITEMPOOL_VERSIE` in `src/lib/items.ts` moet omhoog bij elke wijziging in de vragen.

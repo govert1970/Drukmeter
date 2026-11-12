@@ -50,7 +50,7 @@ export async function maakTeamdeck(people: Persoon[], team: string, datum: strin
   {
     const s = nieuw('Druk hoort bij de rol', 'Uitgangspunt');
     s.addText('De vraag is dus niet óf we druk ervaren. Er zijn drie andere vragen.', { x: 0.6, y: 1.75, w: 11, h: 0.5, fontSize: 18, color: MUTED, margin: 0, isTextBox: true });
-    const v = [[O, 'Waar hoopt de druk zich op?', 'Bij wie, en op welk vlak.'], [G, 'Hoeveel kunnen we zelf bijsturen?', 'Druk waar je invloed op hebt, draag je makkelijker.'], [B, 'Houdt ons herstel het bij?', 'Veel druk is houdbaar zolang je bijtankt.']];
+    const v = [[O, 'Waar hoopt de druk zich op?', 'Bij wie, en op welk vlak.'], [G, 'Hoeveel kunnen we zelf bijsturen?', 'Regelruimte telt apart mee in hoe je druk volhoudt.'], [B, 'Houdt ons herstel het bij?', 'Veel druk is houdbaar zolang je bijtankt.']];
     v.forEach(([k, kop, sub], i) => {
       const x = 0.6 + i * 4.15;
       s.addShape(S.roundRect, { x, y: 2.7, w: 3.85, h: 3.4, fill: { color: TINT }, line: { color: TINT, width: 0 }, rectRadius: 0.12 });

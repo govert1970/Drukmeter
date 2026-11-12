@@ -63,7 +63,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
           <div className="card small">
             <p style={{ marginTop: 0 }}><b>Wat het is, en wat niet.</b> Dit is een gespreksinstrument, geen gevalideerde test. Het geeft een beeld, geen oordeel. Er zijn geen goede of foute antwoorden.</p>
             <p><b>Wie ziet wat.</b> Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.</p>
-            <p style={{ marginBottom: 0 }}><b>Hoe.</b> {ORDER.length} korte vragen, ongeveer 10 minuten. De laatste vier gaan over privé. Denk aan de afgelopen vier weken. Kies wat het eerst bij je opkomt.</p>
+            <p style={{ marginBottom: 0 }}><b>Hoe.</b> {ORDER.length} korte vragen, ongeveer 10 minuten. De laatste zes gaan over privé. Denk aan de afgelopen vier weken. Kies wat het eerst bij je opkomt.</p>
           </div>
           {eerder && <p className="small muted">Je hebt de vragenlijst al eens ingevuld. Als je hem opnieuw invult, tellen je nieuwe antwoorden.</p>}
           <div className="row"><button className="primary" onClick={() => { setFase('vragen'); window.scrollTo(0, 0); }}>Beginnen</button></div>
