@@ -1,6 +1,9 @@
 // Unload teamversie — itempool v0.3 (niet gevalideerd)
 // Drie lagen: wat er op je afkomt (werk: T, D, R, O; privé: P), wat je ermee kunt (regelruimte: G),
 // wat het met je doet (hersteltekort: H, verborgen last: V).
+// Verhoog dit nummer bij elke wijziging in de vragen: referentiedata is alleen binnen één versie vergelijkbaar.
+export const ITEMPOOL_VERSIE = '0.3';
+
 export const SCALES: Record<string, string[]> = {
   W: ["Helemaal niet waar", "Nauwelijks waar", "Deels waar", "Grotendeels waar", "Helemaal waar"],
   F: ["(Bijna) nooit", "Een paar keer per maand", "Wekelijks", "Een paar keer per week", "(Bijna) dagelijks"],

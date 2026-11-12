@@ -29,3 +29,15 @@ alter table dm_deelnemers enable row level security;
 
 -- Bestaande installatie bijwerken (veilig om opnieuw te draaien):
 alter table dm_deelnemers add column if not exists notitie text not null default '';
+
+-- Referentiegroep: antwoorden zonder naam, team of open tekst, alleen met toestemming van de deelnemer.
+-- Bewust geen tijdstempel en geen verwijzing naar dm_deelnemers: een rij is niet naar een persoon te herleiden
+-- en blijft bestaan als een team wordt verwijderd.
+create table if not exists dm_referentie (
+  id uuid primary key default gen_random_uuid(),
+  versie text not null,     -- versie van de itempool
+  maand text not null,      -- jjjj-mm
+  antwoorden text not null
+);
+alter table dm_referentie enable row level security;
+alter table dm_deelnemers add column if not exists referentie_gedeeld boolean not null default false;

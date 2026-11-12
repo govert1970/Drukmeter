@@ -45,6 +45,12 @@ Dit vervangt de indeling in zes vlakken die hierboven staat.
 - **Het teambeeld is een PowerPoint** (`src/lib/teamdeck.ts`, pptxgenjs, draait in de browser van de facilitator). Tien dia's: titel, uitgangspunt, kader, eerst je eigen beeld, teambeeld werk, regelruimte/herstel/verborgen last, belasting tegenover herstel, herkenning, gespreksvragen, afspraken. Zonder namen en zonder privé. Pas beschikbaar vanaf vier deelnemers.
 - `next.config.mjs` bevat een webpack-aanpassing omdat pptxgenjs naar `node:fs` verwijst.
 
+## Referentiegroep
+- Onder de vragenlijst staat een vinkje, standaard uit. Met toestemming gaat één kopie van de 39 antwoorden naar `dm_referentie`: alleen itempoolversie, maand en antwoorden. Geen naam, team, open tekst of tijdstempel.
+- `ITEMPOOL_VERSIE` in `src/lib/items.ts` moet omhoog bij elke wijziging in de vragen.
+- De rapporten tonen de referentiegroep nog niet. Dat heeft pas zin vanaf ongeveer vijftig rijen binnen één versie.
+- Het team zelf is geen norm: het rapport toont het team alleen als spiegel.
+
 ## Techniek
 - Next.js 14 (App Router, TypeScript) op Vercel, met Supabase (Postgres, regio EU) dat alleen via de server benaderd wordt met de service-role-sleutel. RLS staat aan, zonder policies.
 - Het is dezelfde opzet als Goverts Bever/Nextpedition-app (repo govert1970/Nextpedition). Supabase mag hetzelfde project zijn, want de tabellen hebben het prefix `dm_`.

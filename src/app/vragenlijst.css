@@ -41,3 +41,6 @@
   a { color:var(--blue); }
   .opts label.on { border-color:var(--blue); background:#e8f4fb; color:var(--ink); font-weight:600; }
   button:disabled { opacity:.6; cursor:default; }
+
+  .toest { display:flex; gap:10px; align-items:flex-start; font-size:.92rem; color:var(--muted); margin:18px 0 0; cursor:pointer; }
+  .toest input { margin-top:4px; width:18px; height:18px; flex:none; }
