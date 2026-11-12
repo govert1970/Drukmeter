@@ -101,7 +101,7 @@ export default function Admin() {
           <div className="row"><button className="ghost" onClick={async () => { const d = await post('/api/admin/deelnemers', { team_id: team.id, namen: namen.split('\n') }); if (d) { setNamen(''); laad(); } }}>Toevoegen</button></div>
 
           <div className="row" style={{ marginTop: 20 }}>
-            <a href={`/admin/rapport?team=${team.id}`}><button disabled={!klaar}>Rapportage openen ({klaar})</button></a>
+            <a href={`/admin/rapport?team=${team.id}`}><button disabled={!klaar}>Rapporten en teampresentatie ({klaar})</button></a>
             <button className="ghost" onClick={laad}>Vernieuwen</button>
           </div>
         </>

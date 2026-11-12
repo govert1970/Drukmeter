@@ -10,14 +10,14 @@ export const SCALES: Record<string, string[]> = {
 
 export type Dim = { id: string; naam: string; wat: string };
 export const DIMS: Dim[] = [
-  { id: "T", naam: "Taaklast", wat: "Het gewicht van het werk zelf: hoeveel, hoe complex, hoe versnipperd." },
-  { id: "D", naam: "Beslislast", wat: "Hoeveel beslissingen je draagt, hoe zwaar ze zijn en wat ze aan het eind van de dag kosten." },
-  { id: "R", naam: "Relatielast", wat: "Het gewicht van mensen op het werk: overleg, lastige relaties en de energie die het kost om je professioneel te houden." },
-  { id: "O", naam: "Rollast", wat: "Hoeveel petten je draagt, hoe vaak je schakelt en hoe helder de grenzen zijn." },
+  { id: "T", naam: "Taaklast", wat: "Het gewicht van het werk zelf: hoeveel het is, hoe ingewikkeld en hoe vaak je aandacht wordt onderbroken." },
+  { id: "D", naam: "Beslislast", wat: "De beslissingen die je draagt: hoeveel het er zijn, hoe zwaar ze wegen en wat ze je aan het eind van de dag kosten." },
+  { id: "R", naam: "Relatielast", wat: "Wat mensen op het werk van je vragen: veel overleg, een lastige werkrelatie, en professioneel blijven terwijl het van binnen anders voelt." },
+  { id: "O", naam: "Rollast", wat: "De petten die je draagt: hoe vaak je schakelt, hoe helder je verantwoordelijkheid is en of verwachtingen botsen." },
   { id: "P", naam: "Privélast", wat: "Wat er thuis op je afkomt: wat er geregeld moet worden, beslissingen, relaties en verwachtingen." },
-  { id: "G", naam: "Regelruimte", wat: "Hoeveel je zelf kunt bijsturen: je agenda, nee zeggen, overdragen en terugvallen op anderen. Hier is hoog juist goed." },
-  { id: "H", naam: "Hersteltekort", wat: "Hoe goed je bijtankt: slaap, energie en opladen. Een hoge score betekent wéinig herstel." },
-  { id: "V", naam: "Verborgen last", wat: "Wat onder de oppervlakte meeloopt: open eindjes, piekeren en onderhuidse zorg." }
+  { id: "G", naam: "Regelruimte", wat: "Hoeveel je zelf kunt bijsturen: je agenda bepalen, nee zeggen, werk overdragen en terugvallen op anderen. Hoog is hier goed." },
+  { id: "H", naam: "Hersteltekort", wat: "Hoeveel je tekortkomt aan herstel: slaap, energie aan het eind van de dag en opladen in het weekend. Hoog betekent weinig herstel." },
+  { id: "V", naam: "Verborgen last", wat: "Wat onder de oppervlakte meeloopt: open eindjes in je hoofd, piekeren buiten werktijd en onderhuidse zorg." }
 ];
 
 export const GROEPEN: { kop: string; ids: string[] }[] = [

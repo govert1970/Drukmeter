@@ -110,7 +110,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
   const ruimte = last.filter(x => x.s < 40);
   const top = winstVlakken(p);
   const bal = balans(p);
-  const T = 5; // genummerde pagina's na het voorblad
+  const T = 6; // genummerde pagina's na het voorblad
 
   const nergensZwaar = last[0].s < 65;
   let samenvatting = hoogste.length
@@ -122,32 +122,42 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
   samenvatting += p.dims.G >= 60 ? ` Je <b>regelruimte</b> is krap: je kunt zelf weinig bijsturen.` : p.dims.G < 40 ? ` Je <b>regelruimte</b> is ruim: je kunt zelf bijsturen.` : '';
   if (p.dims.P >= 50) samenvatting += ` Ook <b>privé</b> vraagt op dit moment veel.`;
 
-  // Voorblad, daarna pagina 1: uitleg en profiel
+  // Voorblad, pagina 1: het kader met definities, pagina 2: leeswijzer en profiel
+  const def = (id: string) => { const d = DIMS.find(x => x.id === id)!; return `<div class="def"><b>${d.naam}</b><span>${d.wat}</span></div>`; };
   let h = voorblad(p, team, datum) + `<div class="page ext">${dots}
-    <h2 class="first">Waarom deze vragenlijst</h2>
-    <p>Druk hoort bij een rol in een directieteam. De vraag is dus niet óf je druk ervaart. De vraag is waar die zich ophoopt, hoeveel je zelf kunt bijsturen en of je herstel het bijhoudt.</p>
-    <p>Het profiel heeft drie lagen. <b>Wat er op je afkomt</b>, op het werk en privé. <b>Wat je ermee kunt</b>: je regelruimte. En <b>wat het met je doet</b>: je herstel en wat onder de oppervlakte meeloopt.</p>
-    <h2>Hoe je dit leest</h2>
+    <h2 class="first">Het kader: waar hebben we het over</h2>
+    <p>Druk hoort bij een rol in een directieteam. De vraag is dus niet óf je druk ervaart. De vraag is waar die zich ophoopt, hoeveel je zelf kunt bijsturen en of je herstel het bijhoudt. Daarom kijkt deze vragenlijst naar drie lagen.</p>
+    <div class="laag"><div class="laagkop"><i style="background:var(--orange)"></i>1 · Wat er op je afkomt</div>
+      <p class="klein">De druk zelf. Op het werk komt die in vier soorten, en thuis komt er ook het nodige op je af.</p>
+      ${['T', 'D', 'R', 'O', 'P'].map(def).join('')}</div>
+    <div class="laag"><div class="laagkop"><i style="background:var(--green)"></i>2 · Wat je ermee kunt</div>
+      <p class="klein">Dezelfde druk weegt minder als je er invloed op hebt.</p>
+      ${def('G')}</div>
+    <div class="laag"><div class="laagkop"><i style="background:var(--sky)"></i>3 · Wat het met je doet</div>
+      <p class="klein">Waar je aan merkt of je het volhoudt.</p>
+      ${['H', 'V'].map(def).join('')}</div>
+    <p class="klein" style="margin-top:12px">Dit is een gespreksinstrument, geen gevalideerde test. Het geeft een beeld van de afgelopen vier weken, gebaseerd op je eigen antwoorden. Jij weet het beste wat klopt.</p>
+    ${foot(p, 1, T)}</div><div class="page ext">${dots}
+    <h2 class="first">Hoe je dit leest</h2>
     <ul class="uitleg">
       <li><b>Scores lopen van 0 tot 100.</b> Hoe hoger, hoe meer last. Alleen bij regelruimte is hoog juist goed. Het is geen cijfer voor hoe goed je het doet.</li>
       <li><b>Groen is ruimte, geel is voelbaar, oranje is zwaar.</b> De kleuren lopen in elkaar over. Er is geen norm, dus ook geen harde grens: een 58 en een 62 zeggen hetzelfde.</li>
       ${tm ? '<li><b>Het zwarte driehoekje</b> is het gemiddelde van je team. Bij privé staat het er niet: dat is alleen van jou.</li>' : ''}
-      <li><b>Het is een momentopname</b> van de afgelopen vier weken, gebaseerd op je eigen antwoorden. Jij weet het beste wat klopt.</li>
     </ul>
     <h2>Jouw profiel</h2>
     <div class="overzicht">${rijen(p, tm)}</div>
     <div class="samenv">${samenvatting}</div>
-    ${foot(p, 1, T)}</div>`;
+    ${foot(p, 2, T)}</div>`;
 
-  // Pagina 2: balans + wat er op je afkomt
+  // Pagina 3: balans + wat er op je afkomt
   const werk = WERK.slice().sort((a, b) => p.dims[b] - p.dims[a]);
   h += `<div class="page ext">${dots}<h2 class="first">Belasting en herstel</h2>
     <div class="balansrij">${balansSvg(tm ? people : [p], p)}<div><p><b>${bal.kop}.</b> ${bal.tekst}</p><p class="klein">De grote stip ben jij${tm ? ', de lichte stippen zijn je teamgenoten, zonder naam' : ''}. Horizontaal: wat er op het werk op je afkomt. Verticaal: je hersteltekort.</p></div></div>
-    <h2>Wat er op je afkomt · werk</h2>` + werk.slice(0, 2).map(id => dimDetail(p, id, tm)).join('') + foot(p, 2, T) + `</div>`;
+    <h2>Wat er op je afkomt · werk</h2>` + werk.slice(0, 2).map(id => dimDetail(p, id, tm)).join('') + foot(p, 3, T) + `</div>`;
   h += `<div class="page ext">${dots}` + werk.slice(2).map(id => dimDetail(p, id, tm)).join('') +
-    `<h2>Wat er op je afkomt · privé</h2>` + dimDetail(p, 'P', tm) + foot(p, 3, T) + `</div>`;
+    `<h2>Wat er op je afkomt · privé</h2>` + dimDetail(p, 'P', tm) + foot(p, 4, T) + `</div>`;
   h += `<div class="page ext">${dots}<h2 class="first">Wat je ermee kunt</h2>` + dimDetail(p, 'G', tm) +
-    `<h2>Wat het met je doet</h2>` + ['H', 'V'].sort((a, b) => p.dims[b] - p.dims[a]).map(id => dimDetail(p, id, tm)).join('') + foot(p, 4, 5) + `</div>`;
+    `<h2>Wat het met je doet</h2>` + ['H', 'V'].sort((a, b) => p.dims[b] - p.dims[a]).map(id => dimDetail(p, id, tm)).join('') + foot(p, 5, T) + `</div>`;
 
   // Laatste pagina: winst, toelichting, terugkoppeling
   h += `<div class="page ext">${dots}<h2 class="first">Hier zit de meeste winst</h2>`;
@@ -168,7 +178,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
     <div class="vraag"><b>Wat klopt er niet, of mis je?</b><div class="lijn"></div><div class="lijn"></div></div>
     <div class="vraag"><b>Welke ene verandering zou de komende maand het meeste schelen?</b><div class="lijn"></div><div class="lijn"></div></div>
     <div class="vraag"><b>Wat heb je daarvoor nodig van je collega’s?</b><div class="lijn"></div><div class="lijn"></div></div>
-    ${foot(p, 5, 5)}</div>`;
+    ${foot(p, 6, T)}</div>`;
   return h;
 }
 

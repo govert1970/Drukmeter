@@ -11,7 +11,7 @@ Uitgangspunt in alle teksten: **druk hoort bij een directierol.** De vraag is ni
 1. Govert maakt op `/admin` (met wachtwoord) een team aan en plakt de namen. Elke deelnemer krijgt een persoonlijke link `/p/<token>`.
 2. De deelnemer vult 31 vragen en één open vraag in (ongeveer 8 minuten) en ziet zelf **geen** uitslag. De uitslag krijgt hij in de sessie.
 3. Govert ziet per deelnemer of die "ingevuld" heeft. Per deelnemer kan hij een persoonlijke toelichting schrijven.
-4. Twee rapportsoorten, af te drukken als PDF via de browser (A4):
+4. Rapportage (zie voor de actuele vorm "Rapportvormen" hieronder; de twee soorten hierna zijn vervangen):
    - **Sessierapport:** één A4-teamoverzicht plus één A4 per persoon.
    - **Uitgebreid persoonlijk rapport (5 pagina's):** voorblad, uitleg en profiel, de zes vlakken in detail (van zwaar naar licht, met de eigen antwoorden onder "Wat je aangaf" of "Wat goed gaat"), en tot slot de winstpunten, "Wat je vasthoudt", werk en privé, de toelichting van Govert en invulvragen voor terugkoppeling.
 
@@ -39,6 +39,11 @@ Dit vervangt de indeling in zes vlakken die hierboven staat.
 - **Privé staat alleen in het persoonlijke rapport.** Geen adviezen over privé, geen teamgemiddelde, en in het teamoverzicht alleen een telling bij vijf of meer deelnemers en minstens twee personen.
 - **Geen harde grenzen:** kleuren lopen in elkaar over en er zijn overgangslabels ("voelbaar tot zwaar"). Er is geen norm; de drempels 40 en 65 bestaan alleen nog intern, om teksten te kiezen.
 - Het uitgebreide rapport is nu voorblad plus vijf pagina's.
+
+## Rapportvormen (12 november 2026)
+- **Iedere deelnemer krijgt alleen het eigen persoonlijke rapport**: voorblad plus zes pagina's. Pagina 1 is het kader met een korte definitie van elk vlak. Het korte sessierapport van één A4 en het geprinte teamoverzicht zijn vervallen.
+- **Het teambeeld is een PowerPoint** (`src/lib/teamdeck.ts`, pptxgenjs, draait in de browser van de facilitator). Tien dia's: titel, uitgangspunt, kader, eerst je eigen beeld, teambeeld werk, regelruimte/herstel/verborgen last, belasting tegenover herstel, herkenning, gespreksvragen, afspraken. Zonder namen en zonder privé. Pas beschikbaar vanaf vier deelnemers.
+- `next.config.mjs` bevat een webpack-aanpassing omdat pptxgenjs naar `node:fs` verwijst.
 
 ## Techniek
 - Next.js 14 (App Router, TypeScript) op Vercel, met Supabase (Postgres, regio EU) dat alleen via de server benaderd wordt met de service-role-sleutel. RLS staat aan, zonder policies.

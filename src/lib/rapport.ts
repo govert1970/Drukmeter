@@ -193,75 +193,26 @@ export function priveBlok(p: Persoon): string {
   return '<div class="box"><b>Privé.</b> Ook thuis komt er op dit moment veel op je af' + (waar.length ? ', vooral in ' + lijst : '') + '. Dat telt mee in wat je kunt dragen. Het team ziet dit niet: jij bepaalt wat je ervan deelt.</div>';
 }
 
-function rijen(p: Persoon, tm: Record<string, number> | null) {
+export function rijen(p: Persoon, tm: Record<string, number> | null) {
   return GROEPEN.map(g => '<div class="groep">' + g.kop + '</div>' + g.ids.map(id => {
     const d = DIMS.find(x => x.id === id)!;
     return '<div class="dimrow"><div class="nm">' + d.naam + '</div>' + balk(id, p.dims[id], tm && id !== 'P' ? tm[id] : null) + scoreHtml(id, p.dims[id]) + '</div>';
   }).join('')).join('');
 }
-export { rijen };
 
-function indPage(p: Persoon, tm: Record<string, number>, people: Persoon[], team: string, datum: string) {
-  const showTeam = people.length >= 4;
-  let h = '<div class="page ind">' + dots;
-  h += '<h1>Waar zit je druk?</h1><div class="meta">' + esc(p.naam) + (team ? ' · ' + esc(team) : '') + (datum ? ' · ' + esc(datum) : '') + '</div>';
-  h += '<p class="lead">Druk hoort bij je rol. Dit profiel laat zien waar die zich ophoopt, hoeveel je zelf kunt bijsturen en of je herstel het bijhoudt.</p>';
-  h += rijen(p, showTeam ? tm : null);
-  h += '<div class="legend">' + LEGENDA + (showTeam ? ' ▼ is het teamgemiddelde.' : '') + '</div>';
-  const bal = balans(p);
-  h += '<div class="box"><b>Balans: ' + bal.kop.toLowerCase() + '.</b> ' + bal.tekst + '</div>';
-  const top = winstVlakken(p);
-  h += '<h2>Hier zit de meeste winst</h2>';
-  if (!top.length) h += '<p>Geen vlak springt eruit. Kijk in het gesprek vooral naar wat je nu goed doet: dat wil je vasthouden als de druk toeneemt.</p>';
-  top.forEach(({ d, s }) => {
-    h += '<div class="win"><h3 style="margin-top:0">' + d.naam + ' · ' + toon(d.id, s).val + '</h3><ul>' + tipsVoor(p, d.id).map(t => '<li>' + t + '</li>').join("") + '</ul></div>';
+
+// Alles wat het teambeeld nodig heeft, zonder namen. Privé zit er alleen in als telling.
+export function teamCijfers(people: Persoon[]) {
+  const n = people.length, tm = teamMeans(people);
+  const rijen = DIMS.filter(d => d.id !== 'P').map(d => {
+    const rev = d.id === 'G', pos = (x: number) => rev ? 100 - x : x;
+    const sc = people.map(p => p.dims[d.id]), lo = Math.min(...sc), hi = Math.max(...sc), zwaar = sc.filter(x => x >= 65).length;
+    return { d, rev, stippen: sc.map(pos), gem: pos(tm[d.id]), laag: Math.min(pos(lo), pos(hi)), hoog: Math.max(pos(lo), pos(hi)), zwaar,
+      gedeeld: zwaar >= n / 2 || tm[d.id] >= 60, uiteenlopend: hi - lo >= 40, last: tm[d.id] };
   });
-  h += priveBlok(p);
-  if (p.open) h += '<div class="box"><b>Wat je zelf schreef:</b> “' + esc(p.open) + '”</div>';
-  h += '<p style="margin:8px 0 0"><b>Om over na te denken.</b> Herken je dit beeld, en wat klopt er niet? Welke ene verandering zou de komende maand het meeste schelen? Wat heb je daarvoor nodig van je collega’s?</p>';
-  h += '<div class="foot">' + FOOT + '</div></div>';
-  return h;
-}
-
-function teamPage(tm: Record<string, number>, people: Persoon[], team: string, datum: string) {
-  const n = people.length;
-  let h = '<div class="page team">' + dots + '<h1>Teamoverzicht</h1><div class="meta">' + (team ? esc(team) + ' · ' : '') + n + ' deelnemers' + (datum ? ' · ' + esc(datum) : '') + '</div>';
-  if (n < 4) h += '<p class="warn">Bij minder dan vier deelnemers zijn teamcijfers naar personen te herleiden. Laat dit overzicht dan niet zien.</p>';
-  h += '<p class="lead">Elke stip is één teamlid, zonder naam. De zwarte streep is het teamgemiddelde. Kijk naar twee dingen: waar liggen de stippen samen in het oranje (gedeelde spanning), en waar liggen ze ver uit elkaar (jullie ervaren hetzelfde werk heel verschillend)? Privé staat niet in dit overzicht.</p>';
-  const flagged: Dim[] = [];
-  GROEPEN.filter(g => g.ids[0] !== 'P').forEach(g => {
-    h += '<div class="groep">' + ({ T: 'Wat er op jullie afkomt · werk', G: 'Wat jullie ermee kunnen', H: 'Wat het met jullie doet' } as Record<string, string>)[g.ids[0]] + '</div>';
-    g.ids.forEach(id => {
-      const d = DIMS.find(x => x.id === id)!, rev = id === 'G', pos = (s: number) => rev ? 100 - s : s;
-      const sc = people.map(p => p.dims[id]), lo = Math.min(...sc), hi = Math.max(...sc), heavy = sc.filter(s => s >= 65).length;
-      const shared = heavy >= n / 2 || tm[id] >= 60, spread = hi - lo >= 40;
-      if (shared) flagged.push(d);
-      const a = pos(lo), b = pos(hi);
-      h += '<div class="dimrow"><div class="nm">' + d.naam + '</div><div class="track' + (rev ? ' rev' : '') + '">' + sc.map(s => '<div class="dot" style="left:' + pos(s) + '%"></div>').join("") + '<div class="mean" style="left:' + pos(tm[id]) + '%"></div></div><div class="score"><b>' + pos(tm[id]) + '</b> <span style="color:var(--muted)">(' + Math.min(a, b) + '–' + Math.max(a, b) + ')</span></div><div class="ds">' + (shared ? '<span class="flag f-s">gedeelde spanning</span>' : '') + (spread ? '<span class="flag f-u">uiteenlopend</span>' : '') + (heavy ? ' ' + heavy + ' van ' + n + (rev ? ' krap' : ' in het oranje') : '') + '</div></div>';
-    });
-  });
-  h += '<div class="legend">' + LEGENDA + ' Tussen haakjes: laagste en hoogste score.</div>';
-  h += '<div class="foot">' + FOOT + '</div></div><div class="page team">' + dots + '<h1>Teamoverzicht · vervolg</h1><div class="meta">' + (team ? esc(team) + ' · ' : '') + n + ' deelnemers</div>';
-  h += '<h2>Belasting en herstel</h2><div class="balansrij">' + balansSvg(people) + '<div><p>Horizontaal staat wat er op het werk op iemand afkomt: het gemiddelde van taak-, beslis-, relatie- en rollast. Verticaal staat het hersteltekort.</p><p><b>Rechtsonder is houdbaar:</b> veel druk, en het herstel houdt het bij. <b>Rechtsboven niet:</b> daar teert iemand in.</p><p><b>Voor het gesprek:</b> wat doen de mensen rechtsonder anders dan de mensen rechtsboven? En wat maakt dat mogelijk?</p></div></div>';
-
-  const it = ITEMS.filter(x => x.d !== 'P').map(x => ({ x, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
-  h += '<h2>Waar het team zich het meest in herkent</h2><table class="items">' + it.map(o => '<tr><td>' + (o.x.rev ? '<i>(niet waar voor)</i> ' : '') + esc(o.x.q) + '</td><td class="p">' + o.pct + '%</td></tr>').join("") + '</table>';
-  h += '<div class="legend">Percentage dat de last-kant koos. Bij “niet waar voor” is het het percentage dat de uitspraak niet of nauwelijks op zichzelf van toepassing vindt.</div>';
-
-  // Privé alleen noemen als het niet naar één persoon te herleiden is
+  const herkenning = ITEMS.filter(x => x.d !== 'P').map(x => ({ q: x.q, rev: !!x.rev, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
   const pr = people.filter(p => p.dims.P >= 50).length;
-  if (n >= 5 && pr >= 2) h += '<div class="box"><b>Privé.</b> Bij ' + pr + ' van de ' + n + ' vraagt privé op dit moment veel. Wie dat zijn, staat alleen in hun eigen rapport.</div>';
-
-  const focus = flagged.length ? flagged.slice(0, 3) : DIMS.filter(d => d.id !== 'P').sort((a, b) => tm[b.id] - tm[a.id]).slice(0, 2);
-  h += '<h2>' + (flagged.length ? 'Voor het gesprek' : 'Voor het gesprek: de twee hoogste') + '</h2>';
-  focus.forEach(d => { h += '<div class="win"><h3 style="margin-top:0">' + d.naam + '</h3><p><b>Gespreksvraag:</b> ' + TXT[d.id].vraag + '</p><p><b>Mogelijke teamafspraak:</b> ' + TXT[d.id].team + '</p></div>'; });
-  h += '<div class="foot">' + FOOT + '</div></div>';
-  return h;
-}
-
-export function rapportHtml(people: Persoon[], team: string, datum: string): string {
-  if (!people.length) return '';
-  const sorted = [...people].sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
-  const tm = teamMeans(sorted);
-  return teamPage(tm, sorted, team, datum) + sorted.map(p => indPage(p, tm, sorted, team, datum)).join('');
+  const gedeeld = rijen.filter(r => r.gedeeld);
+  const focus = (gedeeld.length ? gedeeld : rijen.slice().sort((a, b) => b.last - a.last).slice(0, 2)).slice(0, 3).map(r => ({ naam: r.d.naam, vraag: TXT[r.d.id].vraag, afspraak: TXT[r.d.id].team }));
+  return { n, rijen, herkenning, prive: n >= 5 && pr >= 2 ? pr : null, focus, punten: people.map(p => { const b = balans(p); return { B: b.B, H: b.H }; }) };
 }
