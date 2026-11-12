@@ -19,7 +19,8 @@
   .dimrow { display:grid; grid-template-columns:120px 1fr 92px; gap:12px; align-items:center; padding:7px 0; border-bottom:1px solid var(--line); }
   .dimrow .nm { font-weight:700; font-variant:small-caps; font-size:15px; }
   .dimrow .ds { font-size:11.5px; color:var(--muted); grid-column:1 / 4; margin-top:-4px; }
-  .track { position:relative; height:16px; border-radius:8px; background:linear-gradient(90deg, #e6f1df 0 40%, #fbf1cf 40% 65%, #fbe1d1 65% 100%); }
+  .track { position:relative; height:16px; border-radius:8px; background:linear-gradient(90deg, #e6f1df 0%, #e6f1df 28%, #fbf1cf 48%, #fbf1cf 56%, #fbe1d1 76%, #fbe1d1 100%); }
+  .track.rev { background:linear-gradient(270deg, #e6f1df 0%, #e6f1df 28%, #fbf1cf 48%, #fbf1cf 56%, #fbe1d1 76%, #fbe1d1 100%); }
   .fill { position:absolute; left:0; top:3px; height:10px; border-radius:6px; }
   .tri { position:absolute; top:-9px; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:7px solid var(--ink); transform:translateX(-5px); }
   .dot { position:absolute; top:3px; width:10px; height:10px; border-radius:50%; background:var(--blue); opacity:.75; transform:translateX(-5px); border:1px solid #fff; }
@@ -114,3 +115,11 @@
 .balansrij { display:grid; grid-template-columns:92mm 1fr; gap:14px; align-items:center; margin-top:4px; }
 .balansrij p { margin:0 0 7px; }
 svg.balans { width:100%; height:auto; display:block; }
+
+/* Drie lagen en overlopende grenzen */
+.groep { font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:9px 0 1px; }
+.overzicht .dimrow, .page.ind .dimrow { grid-template-columns:120px 1fr 150px; }
+.b-rv { background:linear-gradient(90deg,#e6f1df,#fbf1cf); color:#55631f; }
+.b-vz { background:linear-gradient(90deg,#fbf1cf,#fbe1d1); color:#8a5208; }
+.page.team .dimrow { grid-template-columns:120px 1fr 104px; }
+@media print { .page .groep { margin:6px 0 0; } .page.ext .dim { padding:7px 0 9px; } }

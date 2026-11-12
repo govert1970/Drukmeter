@@ -16,7 +16,7 @@ Uitgangspunt in alle teksten: **druk hoort bij een directierol.** De vraag is ni
    - **Uitgebreid persoonlijk rapport (5 pagina's):** voorblad, uitleg en profiel, de zes vlakken in detail (van zwaar naar licht, met de eigen antwoorden onder "Wat je aangaf" of "Wat goed gaat"), en tot slot de winstpunten, "Wat je vasthoudt", werk en privé, de toelichting van Govert en invulvragen voor terugkoppeling.
 
 ## Inhoud
-- Zes vlakken: Taaklast, Beslislast, Relatielast, Rollast, Hersteltekort (hoge score = weinig herstel), Verborgen last. Vijf items per vlak, Verborgen last heeft er zes, in totaal 31. Werk en privé zit in items O5 en V6 en krijgt in het rapport een eigen blok.
+- Zes vlakken: Taaklast, Beslislast, Relatielast, Rollast, Hersteltekort (hoge score = weinig herstel), Verborgen last. (Zie voor de actuele indeling "Itempool v0.3" hieronder.)
 - Scoring: 1–5, met omgekeerde items (T4, O2, H2, H3, H4). Score per vlak = (gemiddelde − 1) / 4 × 100. Banden: 0–39 ruimte (groen), 40–64 voelbaar (geel), 65–100 zwaar (oranje).
 - Teamoverzicht: anonieme stippen per vlak, teamgemiddelde, de vlaggen "gedeelde spanning" (minstens de helft zwaar, of een gemiddelde van 60 of hoger) en "uiteenlopend" (spreiding van 40 of meer), de top-4 uitspraken waarin het team zich herkent, en per aandachtspunt een gespreksvraag plus een mogelijke teamafspraak. Onder 4 deelnemers verschijnt een waarschuwing over herleidbaarheid.
 - **Verander de volgorde van `ITEMS` in `src/lib/items.ts` niet meer** zodra er antwoorden binnen zijn: de antwoorden worden opgeslagen als een reeks van 31 cijfers in die volgorde.
@@ -29,6 +29,16 @@ Uitgangspunt in alle teksten: **druk hoort bij een directierol.** De vraag is ni
 - **Hersteltekort staat altijd bij de winstpunten als het zwaar is** (`winstVlakken`).
 - **Teamoverzicht is twee pagina's.** Het aantal mensen met zware privéomstandigheden staat er alleen bij vijf of meer deelnemers en minstens twee personen.
 - Mislukte inlogpoging op /admin wacht 0,8 seconde.
+
+## Itempool v0.3 (12 november 2026) — drie lagen
+Dit vervangt de indeling in zes vlakken die hierboven staat.
+- **Wat er op je afkomt:** werk (taak-, beslis-, relatie-, rollast, vijf vragen elk) en privé (één vlak, vier vragen die dezelfde vier soorten druk spiegelen).
+- **Wat je ermee kunt:** regelruimte (vijf vragen). Intern rekent de code met het tekort; het rapport toont de regelruimte zelf, waar hoog goed is (`toon` in `rapport.ts`).
+- **Wat het met je doet:** hersteltekort en verborgen last.
+- 39 vragen, ongeveer tien minuten. De vier privévragen staan aan het eind.
+- **Privé staat alleen in het persoonlijke rapport.** Geen adviezen over privé, geen teamgemiddelde, en in het teamoverzicht alleen een telling bij vijf of meer deelnemers en minstens twee personen.
+- **Geen harde grenzen:** kleuren lopen in elkaar over en er zijn overgangslabels ("voelbaar tot zwaar"). Er is geen norm; de drempels 40 en 65 bestaan alleen nog intern, om teksten te kiezen.
+- Het uitgebreide rapport is nu voorblad plus vijf pagina's.
 
 ## Techniek
 - Next.js 14 (App Router, TypeScript) op Vercel, met Supabase (Postgres, regio EU) dat alleen via de server benaderd wordt met de service-role-sleutel. RLS staat aan, zonder policies.

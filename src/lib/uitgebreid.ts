@@ -1,5 +1,5 @@
-import { DIMS, ITEMS, SCALES } from './items';
-import { band, esc, teamMeans, balans, balansSvg, tipsVoor, winstVlakken, type Persoon } from './rapport';
+import { DIMS, ITEMS, SCALES, WERK } from './items';
+import { esc, teamMeans, balans, balansSvg, tipsVoor, winstVlakken, balk, scoreHtml, toon, rijen, type Persoon } from './rapport';
 
 // Betekenis per vlak en per band: zwaar (≥65), voelbaar (40–64), ruimte (<40)
 const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
@@ -23,6 +23,16 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
     v: 'Je schakelt regelmatig tussen rollen, maar de grenzen zijn redelijk helder. Houd in de gaten waar verwachtingen gaan botsen.',
     r: 'Je rol is helder en je hoeft weinig te schakelen. Dat is een sterke basis.'
   },
+  P: {
+    z: 'Ook thuis komt er veel op je af. Dat telt mee, ook al gaat deze vragenlijst vooral over je werk: je hebt maar één voorraad energie. Het rapport geeft hier geen adviezen over. Het benoemt het alleen, zodat je het kunt meewegen.',
+    v: 'Privé vraagt op dit moment het nodige van je. Het overheerst niet, maar het telt mee in wat je kunt dragen.',
+    r: 'Privé vraagt op dit moment weinig extra van je. Dat is ruimte die je op het werk kunt gebruiken, of juist wilt beschermen.'
+  },
+  G: {
+    z: 'Je kunt zelf weinig bijsturen: je agenda wordt voor je gevuld, nee zeggen kost je iets of overdragen lukt niet. Dat maakt dezelfde hoeveelheid druk zwaarder. Druk waar je invloed op hebt, draag je makkelijker dan druk die je overkomt.',
+    v: 'Je kunt deels zelf bijsturen. Op sommige punten heb je ruimte, op andere niet. Kijk hieronder waar het knelt.',
+    r: 'Je kunt goed zelf bijsturen: je bepaalt veel zelf en je kunt terugvallen op anderen. Dat is je belangrijkste hulpbron. Veel druk is beter te dragen als je er invloed op hebt.'
+  },
   H: {
     z: 'Je herstel houdt de druk niet bij: je slaapt te weinig, wordt niet uitgerust wakker of hebt aan het eind van de dag niets meer over. Op dit vlak leunt alles. Bij een tekort worden de andere vlakken vanzelf zwaarder.',
     v: 'Je herstel is wisselend. Meestal laad je op, maar niet altijd genoeg. Dit is het eerste vlak dat wegzakt als de druk toeneemt.',
@@ -41,11 +51,6 @@ function foot(p: Persoon, nr: number, totaal: number) {
   return `<div class="foot"><span>Waar zit je druk? · ${esc(p.naam)} · Gespreksinstrument, geen gevalideerde test.</span><span>Time To Grow · Govert van Sandwijk · ${nr}/${totaal}</span></div>`;
 }
 
-function balk(s: number, teamGem: number | null) {
-  const [, , col] = band(s);
-  return `<div class="track"><div class="fill" style="width:${Math.max(s, 2)}%;background:${col}"></div>${teamGem !== null ? `<div class="tri" style="left:${teamGem}%"></div>` : ''}</div>`;
-}
-
 function lijst(xs: string[]) {
   return xs.length === 1 ? xs[0] : xs.slice(0, -1).join(', ') + ' en ' + xs[xs.length - 1];
 }
@@ -53,27 +58,23 @@ function lijst(xs: string[]) {
 function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
   const d = DIMS.find(x => x.id === dId)!;
   const s = p.dims[dId];
-  const [bl, bc] = band(s);
   const tekst = s >= 65 ? BETEKENIS[dId].z : s >= 40 ? BETEKENIS[dId].v : BETEKENIS[dId].r;
-  const zwaar = ITEMS.filter(it => it.d === dId && !it.wp && p.load[it.id] >= 4)
-    .sort((a, b) => p.load[b.id] - p.load[a.id]).slice(0, 2);
+  const zwaar = ITEMS.filter(it => it.d === dId && p.load[it.id] >= 4).sort((a, b) => p.load[b.id] - p.load[a.id]).slice(0, 2);
   let h = `<div class="dim">
-    <div class="dimhead"><h3>${d.naam}</h3><div class="score"><b>${s}</b><span class="band ${bc}">${bl}</span></div></div>
-    ${balk(s, tm ? tm[dId] : null)}
+    <div class="dimhead"><h3>${d.naam}</h3>${scoreHtml(dId, s)}</div>
+    ${balk(dId, s, tm && dId !== 'P' ? tm[dId] : null)}
     <p class="wat">${d.wat}</p>
     <p>${tekst}</p>`;
   const regel = (it: typeof ITEMS[number]) =>
     `<div class="a">“${esc(it.q)}” <span class="jij">${SCALES[it.s][p.raw[it.id] - 1].toLowerCase()}</span></div>`;
   if (s < 40) {
-    const goed = ITEMS.filter(it => it.d === dId && !it.wp && p.load[it.id] <= 2)
-      .sort((a, b) => p.load[a.id] - p.load[b.id]).slice(0, 2);
+    const goed = ITEMS.filter(it => it.d === dId && p.load[it.id] <= 2).sort((a, b) => p.load[a.id] - p.load[b.id]).slice(0, 2);
     if (goed.length) h += `<div class="antw goed"><span class="lbl">Wat goed gaat</span>` + goed.map(regel).join('') + `</div>`;
   } else if (zwaar.length) {
     h += `<div class="antw"><span class="lbl">Wat je aangaf</span>` + zwaar.map(regel).join('') + `</div>`;
   }
   return h + `</div>`;
 }
-
 
 function voorblad(p: Persoon, team: string, datum: string) {
   const voornaam = esc(p.naam.split(' ')[0]);
@@ -101,68 +102,62 @@ function voorblad(p: Persoon, team: string, datum: string) {
   </div>`;
 }
 
+
 export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: string, datum: string): string {
   const tm = people.length >= 4 ? teamMeans(people) : null;
-  const gesorteerd = DIMS.map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s);
+  const last = DIMS.filter(d => !['P', 'G'].includes(d.id)).map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s);
+  const hoogste = last.filter(x => x.s >= 40).slice(0, 2);
+  const ruimte = last.filter(x => x.s < 40);
   const top = winstVlakken(p);
   const bal = balans(p);
-  const ruimte = gesorteerd.filter(x => x.s < 40);
-  const voornaam = esc(p.naam.split(' ')[0]);
-  const T = 4; // genummerde pagina's na het voorblad
+  const T = 5; // genummerde pagina's na het voorblad
 
-  const nergensZwaar = gesorteerd[0].s < 65;
-  let samenvatting = top.length
+  const nergensZwaar = last[0].s < 65;
+  let samenvatting = hoogste.length
     ? (nergensZwaar
-      ? `Bij jou is geen enkel vlak zwaar. Relatief de meeste druk zit in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`
-      : `Bij jou zit de meeste druk in <b>${lijst(top.map(x => x.d.naam.toLowerCase()))}</b>.`)
+      ? `Bij jou is geen enkel vlak zwaar. Relatief de meeste druk zit in <b>${lijst(hoogste.map(x => x.d.naam.toLowerCase()))}</b>.`
+      : `Bij jou zit de meeste druk in <b>${lijst(hoogste.map(x => x.d.naam.toLowerCase()))}</b>.`)
     : `Bij jou springt geen vlak eruit: de druk is redelijk verdeeld en nergens zwaar.`;
   if (ruimte.length) samenvatting += ` De meeste ruimte zit in <b>${lijst(ruimte.slice(-2).reverse().map(x => x.d.naam.toLowerCase()))}</b>.`;
-  if (p.dims.H >= 65) samenvatting += ` Let vooral op je herstel: dat is het vlak waar de rest op leunt.`;
+  samenvatting += p.dims.G >= 60 ? ` Je <b>regelruimte</b> is krap: je kunt zelf weinig bijsturen.` : p.dims.G < 40 ? ` Je <b>regelruimte</b> is ruim: je kunt zelf bijsturen.` : '';
+  if (p.dims.P >= 50) samenvatting += ` Ook <b>privé</b> vraagt op dit moment veel.`;
 
-  // Voorblad, daarna pagina 1: uitleg en overzicht
+  // Voorblad, daarna pagina 1: uitleg en profiel
   let h = voorblad(p, team, datum) + `<div class="page ext">${dots}
     <h2 class="first">Waarom deze vragenlijst</h2>
-    <p>Druk hoort bij een rol in een directieteam. De vraag is dus niet óf je druk ervaart, maar waar die zich ophoopt en of je herstel het bijhoudt. Druk wordt pas een probleem als hij zich op één plek opstapelt, of als je niet meer bijtankt.</p>
-    <p>De vragenlijst kijkt naar zes vlakken. Vier gaan over wat er op je afkomt: het werk zelf, beslissingen, mensen en rollen. Eén gaat over hoe goed je herstelt. En één over wat onder de oppervlakte meeloopt.</p>
+    <p>Druk hoort bij een rol in een directieteam. De vraag is dus niet óf je druk ervaart. De vraag is waar die zich ophoopt, hoeveel je zelf kunt bijsturen en of je herstel het bijhoudt.</p>
+    <p>Het profiel heeft drie lagen. <b>Wat er op je afkomt</b>, op het werk en privé. <b>Wat je ermee kunt</b>: je regelruimte. En <b>wat het met je doet</b>: je herstel en wat onder de oppervlakte meeloopt.</p>
     <h2>Hoe je dit leest</h2>
     <ul class="uitleg">
-      <li><b>Scores lopen van 0 tot 100.</b> Hoe hoger, hoe meer last op dat vlak. Het is geen cijfer voor hoe goed je het doet.</li>
-      <li><b>Groen is ruimte</b> (0–39), <b>geel is voelbaar</b> (40–64), <b>oranje is zwaar</b> (65–100). Zwaar is geen alarm, wel een plek om naar te kijken.</li>
-      ${tm ? '<li><b>Het zwarte driehoekje</b> is het gemiddelde van je team. Zo zie je of iets bij jou speelt, of bij jullie allemaal.</li>' : ''}
-      <li><b>Het is een momentopname</b> van de afgelopen vier weken, gebaseerd op je eigen antwoorden. Het is een gespreksinstrument, geen gevalideerde test. Jij weet het beste wat klopt.</li>
+      <li><b>Scores lopen van 0 tot 100.</b> Hoe hoger, hoe meer last. Alleen bij regelruimte is hoog juist goed. Het is geen cijfer voor hoe goed je het doet.</li>
+      <li><b>Groen is ruimte, geel is voelbaar, oranje is zwaar.</b> De kleuren lopen in elkaar over. Er is geen norm, dus ook geen harde grens: een 58 en een 62 zeggen hetzelfde.</li>
+      ${tm ? '<li><b>Het zwarte driehoekje</b> is het gemiddelde van je team. Bij privé staat het er niet: dat is alleen van jou.</li>' : ''}
+      <li><b>Het is een momentopname</b> van de afgelopen vier weken, gebaseerd op je eigen antwoorden. Jij weet het beste wat klopt.</li>
     </ul>
     <h2>Jouw profiel</h2>
-    <div class="overzicht">` + DIMS.map(d => {
-      const s = p.dims[d.id]; const [bl, bc] = band(s);
-      return `<div class="orow"><div class="nm">${d.naam}</div>${balk(s, tm ? tm[d.id] : null)}<div class="score"><b>${s}</b><span class="band ${bc}">${bl}</span></div></div>`;
-    }).join('') + `</div>
+    <div class="overzicht">${rijen(p, tm)}</div>
     <div class="samenv">${samenvatting}</div>
-    <h2>Belasting en herstel</h2>
-    <div class="balansrij">${balansSvg(tm ? people : [p], p)}<div><p><b>${bal.kop}.</b> ${bal.tekst}</p><p class="klein">De grote stip ben jij${tm ? ', de lichte stippen zijn je teamgenoten, zonder naam' : ''}. Horizontaal staat wat er op je afkomt: het gemiddelde van taak-, beslis-, relatie- en rollast. Verticaal staat je hersteltekort.</p></div></div>
     ${foot(p, 1, T)}</div>`;
 
-  // Pagina 2 en 3: de zes vlakken
-  const volgorde = gesorteerd.map(x => x.d.id);
-  h += `<div class="page ext">${dots}<h2 class="first">De zes vlakken, van zwaar naar licht</h2>` +
-    volgorde.slice(0, 3).map(id => dimDetail(p, id, tm)).join('') + foot(p, 2, T) + `</div>`;
-  h += `<div class="page ext">${dots}` +
-    volgorde.slice(3).map(id => dimDetail(p, id, tm)).join('') + foot(p, 3, T) + `</div>`;
+  // Pagina 2: balans + wat er op je afkomt
+  const werk = WERK.slice().sort((a, b) => p.dims[b] - p.dims[a]);
+  h += `<div class="page ext">${dots}<h2 class="first">Belasting en herstel</h2>
+    <div class="balansrij">${balansSvg(tm ? people : [p], p)}<div><p><b>${bal.kop}.</b> ${bal.tekst}</p><p class="klein">De grote stip ben jij${tm ? ', de lichte stippen zijn je teamgenoten, zonder naam' : ''}. Horizontaal: wat er op het werk op je afkomt. Verticaal: je hersteltekort.</p></div></div>
+    <h2>Wat er op je afkomt · werk</h2>` + werk.slice(0, 2).map(id => dimDetail(p, id, tm)).join('') + foot(p, 2, T) + `</div>`;
+  h += `<div class="page ext">${dots}` + werk.slice(2).map(id => dimDetail(p, id, tm)).join('') +
+    `<h2>Wat er op je afkomt · privé</h2>` + dimDetail(p, 'P', tm) + foot(p, 3, T) + `</div>`;
+  h += `<div class="page ext">${dots}<h2 class="first">Wat je ermee kunt</h2>` + dimDetail(p, 'G', tm) +
+    `<h2>Wat het met je doet</h2>` + ['H', 'V'].sort((a, b) => p.dims[b] - p.dims[a]).map(id => dimDetail(p, id, tm)).join('') + foot(p, 4, 5) + `</div>`;
 
-  // Pagina 4: winst, werk/privé, toelichting, terugkoppeling
+  // Laatste pagina: winst, toelichting, terugkoppeling
   h += `<div class="page ext">${dots}<h2 class="first">Hier zit de meeste winst</h2>`;
   if (top.length && nergensZwaar) h += `<p>Niets is bij jou zwaar. Zie dit dus als onderhoud, geen reparatie: kleine dingen die voorkomen dat deze vlakken oplopen als het drukker wordt.</p>`;
   if (!top.length) h += `<p>Geen vlak springt eruit. Kijk vooral naar wat je nu goed doet: dat wil je vasthouden als de druk toeneemt.</p>`;
   top.forEach(({ d, s }) => {
-    h += `<div class="win"><h3>${d.naam} · ${s}</h3><p class="klein">Gekozen bij de uitspraken waarop je het zwaarst scoorde.</p><ul>${tipsVoor(p, d.id).map(t => `<li>${t}</li>`).join('')}</ul></div>`;
+    h += `<div class="win"><h3>${d.naam} · ${toon(d.id, s).val}</h3><p class="klein">Gekozen bij de uitspraken waarop je het zwaarst scoorde.</p><ul>${tipsVoor(p, d.id).map(t => `<li>${t}</li>`).join('')}</ul></div>`;
   });
   if (ruimte.length) {
     h += `<div class="win bron"><h3>Wat je vasthoudt</h3><p>${(t => t.charAt(0).toUpperCase() + t.slice(1))(lijst(ruimte.map(x => x.d.naam.toLowerCase())))} ${ruimte.length === 1 ? 'is' : 'zijn'} op dit moment een bron van ruimte. Als de druk toeneemt, zijn dit de vlakken die je wilt beschermen. Wat doe je hier nu dat werkt, en wat zou je als eerste laten vallen als het druk wordt?</p></div>`;
-  }
-  if (p.raw.O5 >= 4 || p.raw.V6 >= 4) {
-    const delen: string[] = [];
-    if (p.raw.O5 >= 4) delen.push('werk en privé bij jou om dezelfde tijd en energie concurreren');
-    if (p.raw.V6 >= 4) delen.push('je privéomstandigheden nu veel van je vragen');
-    h += `<div class="box"><b>Werk en privé.</b> Je geeft aan dat ${delen.join(', en dat ')}. Dat is geen zwakte, wel informatie: je capaciteit is nu anders dan je team misschien aanneemt. Deze uitspraken tellen niet mee in de zes vlakken, en jij bepaalt hoeveel je ervan deelt.</div>`;
   }
   if (p.open) h += `<div class="box"><b>Wat je zelf schreef.</b> “${esc(p.open)}”</div>`;
   if (p.notitie) h += `<div class="noot"><span class="lbl">Toelichting van Govert</span><p>${esc(p.notitie).replace(/\n/g, '<br>')}</p></div>`;
@@ -173,7 +168,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
     <div class="vraag"><b>Wat klopt er niet, of mis je?</b><div class="lijn"></div><div class="lijn"></div></div>
     <div class="vraag"><b>Welke ene verandering zou de komende maand het meeste schelen?</b><div class="lijn"></div><div class="lijn"></div></div>
     <div class="vraag"><b>Wat heb je daarvoor nodig van je collega’s?</b><div class="lijn"></div><div class="lijn"></div></div>
-    ${foot(p, 4, T)}</div>`;
+    ${foot(p, 5, 5)}</div>`;
   return h;
 }
 

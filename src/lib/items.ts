@@ -1,5 +1,6 @@
-// Unload teamversie — itempool v0.2 (niet gevalideerd)
-// v0.2: R1 en H3 herschreven; O5 en V6 (werk/privé) tellen niet meer mee in een vlakscore.
+// Unload teamversie — itempool v0.3 (niet gevalideerd)
+// Drie lagen: wat er op je afkomt (werk: T, D, R, O; privé: P), wat je ermee kunt (regelruimte: G),
+// wat het met je doet (hersteltekort: H, verborgen last: V).
 export const SCALES: Record<string, string[]> = {
   W: ["Helemaal niet waar", "Nauwelijks waar", "Deels waar", "Grotendeels waar", "Helemaal waar"],
   F: ["(Bijna) nooit", "Een paar keer per maand", "Wekelijks", "Een paar keer per week", "(Bijna) dagelijks"],
@@ -11,14 +12,25 @@ export type Dim = { id: string; naam: string; wat: string };
 export const DIMS: Dim[] = [
   { id: "T", naam: "Taaklast", wat: "Het gewicht van het werk zelf: hoeveel, hoe complex, hoe versnipperd." },
   { id: "D", naam: "Beslislast", wat: "Hoeveel beslissingen je draagt, hoe zwaar ze zijn en wat ze aan het eind van de dag kosten." },
-  { id: "R", naam: "Relatielast", wat: "Het gewicht van mensen: overleg, lastige relaties en de energie die het kost om je professioneel te houden." },
+  { id: "R", naam: "Relatielast", wat: "Het gewicht van mensen op het werk: overleg, lastige relaties en de energie die het kost om je professioneel te houden." },
   { id: "O", naam: "Rollast", wat: "Hoeveel petten je draagt, hoe vaak je schakelt en hoe helder de grenzen zijn." },
+  { id: "P", naam: "Privélast", wat: "Wat er thuis op je afkomt: wat er geregeld moet worden, beslissingen, relaties en verwachtingen." },
+  { id: "G", naam: "Regelruimte", wat: "Hoeveel je zelf kunt bijsturen: je agenda, nee zeggen, overdragen en terugvallen op anderen. Hier is hoog juist goed." },
   { id: "H", naam: "Hersteltekort", wat: "Hoe goed je bijtankt: slaap, energie en opladen. Een hoge score betekent wéinig herstel." },
   { id: "V", naam: "Verborgen last", wat: "Wat onder de oppervlakte meeloopt: open eindjes, piekeren en onderhuidse zorg." }
 ];
 
-// rev:true = omgekeerd gescoord (hoog antwoord = weinig last)
-export type Item = { id: string; d: string; s: string; q: string; rev?: boolean; wp?: boolean };
+export const GROEPEN: { kop: string; ids: string[] }[] = [
+  { kop: "Wat er op je afkomt · werk", ids: ["T", "D", "R", "O"] },
+  { kop: "Wat er op je afkomt · privé", ids: ["P"] },
+  { kop: "Wat je ermee kunt", ids: ["G"] },
+  { kop: "Wat het met je doet", ids: ["H", "V"] }
+];
+export const WERK = ["T", "D", "R", "O"];
+
+// rev:true = omgekeerd gescoord (hoog antwoord = weinig last). Bij regelruimte (G) is elke uitspraak omgekeerd:
+// intern rekenen we met het tekort aan regelruimte, in het rapport tonen we de regelruimte zelf.
+export type Item = { id: string; d: string; s: string; q: string; rev?: boolean };
 export const ITEMS: Item[] = [
   { id: "T1", d: "T", s: "W", q: "Op een gewone werkdag heb ik meer op mijn bord dan ik met volle aandacht kan doen." },
   { id: "T2", d: "T", s: "F", q: "Mijn werk vraagt dat ik me inwerk in onderwerpen die nieuw of onduidelijk voor me zijn." },
@@ -42,7 +54,18 @@ export const ITEMS: Item[] = [
   { id: "O2", d: "O", s: "W", rev: true, q: "Het is me duidelijk waar mijn verantwoordelijkheid ophoudt en die van een ander begint." },
   { id: "O3", d: "O", s: "F", q: "Verschillende mensen verwachten tegelijk dingen van me die niet samengaan." },
   { id: "O4", d: "O", s: "W", q: "Ik word aangesproken op resultaten waar ik maar beperkt invloed op heb." },
-  { id: "O5", d: "O", s: "W", wp: true, q: "Werk en privé concurreren bij mij om dezelfde tijd en energie." },
+  { id: "O5", d: "O", s: "W", q: "Mijn rol is de laatste tijd groter geworden zonder dat er iets af is gegaan." },
+
+  { id: "P1", d: "P", s: "W", q: "Thuis komt er veel op mij neer dat geregeld of gedaan moet worden." },
+  { id: "P2", d: "P", s: "W", q: "Er spelen privé beslissingen die zwaar op me wegen." },
+  { id: "P3", d: "P", s: "W", q: "Er is privé een relatie die me op dit moment veel energie kost." },
+  { id: "P4", d: "P", s: "W", q: "Privé verwachten mensen meer van me dan ik nu kan geven." },
+
+  { id: "G1", d: "G", s: "W", rev: true, q: "Ik bepaal grotendeels zelf hoe mijn agenda eruitziet." },
+  { id: "G2", d: "G", s: "W", rev: true, q: "Ik kan nee zeggen tegen een verzoek zonder dat het me iets kost." },
+  { id: "G3", d: "G", s: "W", rev: true, q: "Ik bepaal zelf hoe ik mijn werk aanpak." },
+  { id: "G4", d: "G", s: "W", rev: true, q: "Als het me te veel wordt, kan ik werk aan een ander overdragen." },
+  { id: "G5", d: "G", s: "W", rev: true, q: "Er zijn mensen op wie ik kan terugvallen als het tegenzit." },
 
   { id: "H1", d: "H", s: "NACHT", q: "Hoeveel nachten per week slaap je minder dan je nodig hebt?" },
   { id: "H2", d: "H", s: "F", rev: true, q: "Ik word uitgerust wakker." },
@@ -54,9 +77,11 @@ export const ITEMS: Item[] = [
   { id: "V2", d: "V", s: "F", q: "In mijn vrije tijd ben ik in gedachten met werk bezig." },
   { id: "V3", d: "V", s: "F", q: "Werk houdt me 's nachts wakker of maakt me wakker." },
   { id: "V4", d: "V", s: "W", q: "Ik heb een onderhuids gevoel dat er iets mis kan gaan wat ik nog niet zie." },
-  { id: "V5", d: "V", s: "W", q: "In mijn rol voel ik dat ik iemand moet zijn die ik niet helemaal ben." },
-  { id: "V6", d: "V", s: "W", wp: true, q: "Mijn privéomstandigheden vragen op dit moment veel van me." }
+  { id: "V5", d: "V", s: "W", q: "In mijn rol voel ik dat ik iemand moet zijn die ik niet helemaal ben." }
 ];
 
-// Vaste, gemengde volgorde zodat dimensies niet herkenbaar in blokken staan
-export const ORDER: string[] = ["T1","R1","H1","D1","O1","V1","T3","R2","D2","H2","O2","V2","T2","D3","R3","H3","O3","V3","T4","D4","R4","H4","O4","V4","T5","D5","R5","H5","O5","V5","V6"];
+// Vaste, gemengde volgorde zodat vlakken niet herkenbaar in blokken staan. De vier privévragen staan bij elkaar aan het eind.
+export const ORDER: string[] = [
+  "T1","R1","H1","D1","O1","G1","V1","T3","R2","D2","H2","O2","G2","V2","T2","D3","R3","H3","O3","G3","V3",
+  "T4","D4","R4","H4","O4","G4","V4","T5","D5","R5","H5","O5","G5","V5","P1","P2","P3","P4"
+];

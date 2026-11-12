@@ -1,4 +1,5 @@
-import { DIMS, ITEMS, SCALES, type Dim } from './items';
+import { DIMS, ITEMS, SCALES, GROEPEN, WERK, type Dim } from './items';
+export { SCALES };
 
 export const TXT: Record<string, { hoog: string; tips: string[]; team: string; vraag: string }> = {
   T: { hoog: "Het werk zelf vraagt veel van je: volume, complexiteit of versnippering. De winst zit meestal in het beschermen van focustijd, niet in harder werken.",
@@ -31,6 +32,10 @@ export const TXT: Record<string, { hoog: string; tips: string[]; team: string; v
               "Plan herstel in je agenda zoals je werk plant. Een weekend dat volloopt met inhalen, is geen herstel."],
        team: "Maak afspraken over bereikbaarheid buiten werktijd, en houd je er als directie zelf aan. De organisatie kijkt naar jullie.",
        vraag: "Welke norm over bereikbaarheid hanteren we stilzwijgend?" },
+  G: { hoog: "Je kunt zelf weinig bijsturen. Dat maakt dezelfde druk zwaarder.",
+       tips: [],
+       team: "Spreek af wat ieder zelf mag beslissen zonder afstemming, en wat ieder mag weigeren of doorschuiven.",
+       vraag: "Waar geven we elkaar minder ruimte dan nodig is?" },
   V: { hoog: "Er loopt veel onder de oppervlakte mee: open eindjes, piekeren of onderhuidse zorg. Dit is de last die je collega's het minst zien.",
        tips: ["Leeg je hoofd op papier: één lijst met alles wat je nog draagt. Wat opgeschreven is, hoeft je brein niet meer vast te houden.",
               "Sluit je werkdag af met drie regels: wat is af, wat ligt er open, wat is morgen de eerste stap.",
@@ -40,18 +45,6 @@ export const TXT: Record<string, { hoog: string; tips: string[]; team: string; v
 };
 
 
-export type Persoon = { naam: string; open: string; notitie?: string; raw: Record<string, number>; load: Record<string, number>; dims: Record<string, number> };
-export function scoreOf(o: { n: string; a: string; t?: string }): Persoon {
-  const v: Record<string, number> = {}; ITEMS.forEach((it, i) => v[it.id] = +o.a[i]);
-  const load = (id: string) => { const it = ITEMS.find(x => x.id === id)!; return it.rev ? 6 - v[id] : v[id]; };
-  const dims: Record<string, number> = {};
-  DIMS.forEach(d => {
-    const ids = ITEMS.filter(it => it.d === d.id && !it.wp).map(it => it.id); // werk/privé telt niet mee in een vlak
-    const m = ids.reduce((s, id) => s + load(id), 0) / ids.length;
-    dims[d.id] = Math.round((m - 1) / 4 * 100);
-  });
-  return { naam: o.n, open: o.t || "", raw: v, load: Object.fromEntries(ITEMS.map(it => [it.id, load(it.id)])), dims };
-}
 
 // Eén suggestie per uitspraak: het rapport kiest de suggesties bij de uitspraken waarop iemand het zwaarst scoort.
 export const ITEMTIP: Record<string, string> = {
@@ -74,6 +67,12 @@ export const ITEMTIP: Record<string, string> = {
   O2: "Maak in het team expliciet waar jouw verantwoordelijkheid ophoudt. Onduidelijkheid los je niet in je eentje op.",
   O3: "Waar verwachtingen botsen, leg je de botsing terug bij de mensen die ze hebben, in plaats van hem zelf op te lossen.",
   O4: "Je wordt aangesproken op wat je maar deels kunt beïnvloeden. Spreek af waarop je wél aanspreekbaar bent, en benoem wat buiten je invloed ligt.",
+  O5: "Je rol is gegroeid zonder dat er iets af is gegaan. Leg naast elkaar wat erbij kwam en wat je nog steeds doet, en bespreek wat ervan af kan of naar wie het gaat.",
+  G1: "Je agenda wordt vooral door anderen gevuld. Blokkeer vaste tijd voordat de week begint, en laat nieuwe afspraken langs één persoon lopen die weet wat voorgaat.",
+  G2: "Nee zeggen kost je iets. Oefen met de tussenvorm: niet nu, wel op dit moment, of wel als er iets anders afgaat.",
+  G3: "Je hebt weinig vrijheid in hoe je het werk aanpakt. Benoem waar je meer ruimte nodig hebt en wat je daarvoor teruggeeft: resultaat in plaats van afstemming.",
+  G4: "Overdragen lukt je niet als het te veel wordt. Kies nu, terwijl het nog gaat, één verantwoordelijkheid die een ander kan overnemen en draag die echt over.",
+  G5: "Je hebt weinig mensen om op terug te vallen. Dat bouw je niet op als het tegenzit. Investeer nu in één of twee mensen bij wie je niets hoeft op te houden.",
   H1: "Behandel slaap als werkinstrument: een vaste bedtijd en geen mail in het laatste uur.",
   H2: "Je wordt zelden uitgerust wakker. Kijk eerst naar je avond: laat doorwerken en schermen kosten vaak meer slaapkwaliteit dan je denkt. Blijft het zo, bespreek het dan met je huisarts.",
   H3: "Aan het eind van de dag is je energie op. Neem overdag pauzes die echt pauze zijn: tien minuten zonder scherm en zonder gesprek.",
@@ -86,88 +85,138 @@ export const ITEMTIP: Record<string, string> = {
   V5: "Je voelt dat je iemand moet zijn die je niet helemaal bent. Dat vraagt geen tip maar een gesprek: met een coach, of met iemand die je vertrouwt."
 };
 
-// Suggesties bij de uitspraken waarop deze persoon het zwaarst scoort (minstens twee, hoogstens drie).
-export function tipsVoor(p: Persoon, dId: string): string[] {
-  const items = ITEMS.filter(it => it.d === dId && !it.wp).sort((a, b) => p.load[b.id] - p.load[a.id]);
-  const zwaar = items.filter(it => p.load[it.id] >= 4).slice(0, 3);
-  return (zwaar.length >= 2 ? zwaar : items.slice(0, 2)).map(it => ITEMTIP[it.id]);
+
+export type Persoon = { naam: string; open: string; notitie?: string; raw: Record<string, number>; load: Record<string, number>; dims: Record<string, number> };
+export function scoreOf(o: { n: string; a: string; t?: string }): Persoon {
+  const v: Record<string, number> = {}; ITEMS.forEach((it, i) => v[it.id] = +o.a[i]);
+  const load = (id: string) => { const it = ITEMS.find(x => x.id === id)!; return it.rev ? 6 - v[id] : v[id]; };
+  const dims: Record<string, number> = {};
+  DIMS.forEach(d => {
+    const ids = ITEMS.filter(it => it.d === d.id).map(it => it.id);
+    const m = ids.reduce((s, id) => s + load(id), 0) / ids.length;
+    dims[d.id] = Math.round((m - 1) / 4 * 100); // bij G is dit het tekort aan regelruimte
+  });
+  return { naam: o.n, open: o.t || "", raw: v, load: Object.fromEntries(ITEMS.map(it => [it.id, load(it.id)])), dims };
 }
 
-// De twee vlakken met de meeste winst. Een zwaar hersteltekort hoort er altijd bij: daar leunt de rest op.
-export function winstVlakken(p: Persoon): { d: Dim; s: number }[] {
-  const lijst = DIMS.map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s).filter(x => x.s >= 40);
-  const top = lijst.slice(0, 2);
-  if (p.dims.H >= 65 && !top.some(x => x.d.id === 'H')) top[top.length - 1] = lijst.find(x => x.d.id === 'H')!;
-  return top;
+// Er is geen norm, dus ook geen harde grens: kleuren en labels lopen in elkaar over.
+function meng(a: number[], b: number[], t: number) { return 'rgb(' + a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(',') + ')'; }
+const GROEN = [138, 186, 64], GEEL = [245, 213, 8], ORANJE = [235, 122, 44];
+export function kleur(s: number) {
+  return s <= 25 ? meng(GROEN, GROEN, 0) : s <= 52 ? meng(GROEN, GEEL, (s - 25) / 27) : s <= 78 ? meng(GEEL, ORANJE, (s - 52) / 26) : meng(ORANJE, ORANJE, 0);
 }
-
-// Balans: wat er op je afkomt (taak, beslis, relatie, rol) tegenover hoe goed je herstelt.
-export function balans(p: Persoon) {
-  const B = Math.round((p.dims.T + p.dims.D + p.dims.R + p.dims.O) / 4), H = p.dims.H;
-  const hoog = B >= 50, tekort = H >= 50;
-  const [kop, tekst] = hoog && tekort
-    ? ["Veel belasting, te weinig herstel", "Er komt veel op je af en je tankt te weinig bij. Dat houd je een tijd vol, maar niet onbeperkt. Begin bij je herstel: dat verander je sneller dan de hoeveelheid werk."]
-    : hoog
-    ? ["Veel belasting, en je herstel houdt het bij", "Er komt veel op je af, en je tankt genoeg bij. Dat is houdbaar. Je herstel is wel het eerste dat je moet beschermen als het nog drukker wordt."]
-    : tekort
-    ? ["Het zit niet in de hoeveelheid", "De belasting vanuit het werk is niet uitzonderlijk, maar je herstelt toch te weinig. De oorzaak ligt dan vaak ergens anders: in wat onder de oppervlakte meeloopt, of in wat er privé speelt."]
-    : ["Ruimte", "De belasting is te dragen en je herstelt goed. Je hebt reserve. De vraag is waar je die voor wilt gebruiken."];
-  return { B, H, kop, tekst };
+export function band(s: number): [string, string, string] {
+  const [l, c] = s >= 70 ? ["Zwaar", "b-z"] : s >= 60 ? ["Voelbaar tot zwaar", "b-vz"] : s >= 45 ? ["Voelbaar", "b-v"] : s >= 35 ? ["Ruimte tot voelbaar", "b-rv"] : ["Ruimte", "b-r"];
+  return [l, c, kleur(s)];
 }
-
-// Eén beeld: belasting (horizontaal) tegenover hersteltekort (verticaal). Stippen zijn teamleden, zonder naam.
-export function balansSvg(people: Persoon[], ik?: Persoon): string {
-  const X = (b: number) => 46 + b / 100 * 244, Y = (h: number) => 176 - h / 100 * 166;
-  const anderen = people.filter(q => q !== ik).map(q => { const b = balans(q); return `<circle cx="${X(b.B).toFixed(1)}" cy="${Y(b.H).toFixed(1)}" r="5" fill="#1d2430" opacity="${ik ? .22 : .8}" stroke="#fff" stroke-width="1"/>`; }).join('');
-  const mij = ik ? (() => { const b = balans(ik); return `<circle cx="${X(b.B).toFixed(1)}" cy="${Y(b.H).toFixed(1)}" r="7.5" fill="#1d2430" stroke="#fff" stroke-width="2"/>`; })() : '';
-  return `<svg class="balans" viewBox="0 0 300 204" role="img" aria-label="Belasting tegenover hersteltekort">
-    <rect x="46" y="10" width="122" height="83" fill="#fbf1cf"/><rect x="168" y="10" width="122" height="83" fill="#fbe1d1"/>
-    <rect x="46" y="93" width="122" height="83" fill="#e6f1df"/><rect x="168" y="93" width="122" height="83" fill="#f3f4f6"/>
-    <g font-size="8.5" fill="#5b6575"><text x="51" y="22">Niet de hoeveelheid</text><text x="285" y="22" text-anchor="end">Te weinig herstel</text>
-    <text x="51" y="171">Ruimte</text><text x="285" y="171" text-anchor="end">Houdbaar</text></g>
-    ${anderen}${mij}
-    <g font-size="9.5" fill="#1d2430" font-weight="700"><text x="168" y="194" text-anchor="middle">Belasting →</text>
-    <text transform="translate(34 93) rotate(-90)" text-anchor="middle">Hersteltekort →</text></g>
-  </svg>`;
+// Wat het rapport toont. Bij regelruimte tonen we de ruimte zelf (hoog = goed), intern rekenen we met het tekort.
+export function toon(dId: string, s: number): { val: number; label: string; cls: string; col: string; rev: boolean } {
+  const [l, c, col] = band(s);
+  if (dId !== 'G') return { val: s, label: l, cls: c, col, rev: false };
+  const label = s >= 70 ? "Krap" : s >= 60 ? "Beperkt tot krap" : s >= 45 ? "Beperkt" : s >= 35 ? "Ruim tot beperkt" : "Ruim";
+  return { val: 100 - s, label, cls: c, col, rev: true };
 }
-
-export function band(s: number) { return s >= 65 ? ["Zwaar", "b-z", "var(--orange)"] : s >= 40 ? ["Voelbaar", "b-v", "var(--yellow)"] : ["Ruimte", "b-r", "var(--green)"]; }
+export function balk(dId: string, s: number, teamGem: number | null) {
+  const t = toon(dId, s);
+  const tri = teamGem === null ? '' : `<div class="tri" style="left:${t.rev ? 100 - teamGem : teamGem}%"></div>`;
+  return `<div class="track${t.rev ? ' rev' : ''}"><div class="fill" style="width:${Math.max(t.val, 2)}%;background:${t.col}"></div>${tri}</div>`;
+}
+export function scoreHtml(dId: string, s: number) {
+  const t = toon(dId, s);
+  return `<div class="score"><b>${t.val}</b><span class="band ${t.cls}">${t.label}</span></div>`;
+}
 export function esc(s: string) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--sky)"></i></div>';
 const FOOT = 'Gespreksinstrument, geen gevalideerde test. Scores zijn een momentopname van de afgelopen vier weken. Time To Grow · Govert van Sandwijk';
+export const LEGENDA = 'Groen is ruimte, geel is voelbaar, oranje is zwaar. De kleuren lopen in elkaar over: er is geen norm, dus ook geen harde grens. Bij regelruimte is hoog juist goed.';
 
 export function teamMeans(people: Persoon[]) {
   const r: Record<string, number> = {}; DIMS.forEach(d => r[d.id] = Math.round(people.reduce((s, p) => s + p.dims[d.id], 0) / people.length)); return r;
 }
 
+// Suggesties bij de uitspraken waarop deze persoon het zwaarst scoort (minstens twee, hoogstens drie).
+export function tipsVoor(p: Persoon, dId: string): string[] {
+  const items = ITEMS.filter(it => it.d === dId).sort((a, b) => p.load[b.id] - p.load[a.id]);
+  const zwaar = items.filter(it => p.load[it.id] >= 4).slice(0, 3);
+  return (zwaar.length >= 2 ? zwaar : items.slice(0, 2)).map(it => ITEMTIP[it.id]);
+}
+
+// De twee vlakken met de meeste winst. Privé doet niet mee: daar geven we geen adviezen over.
+// Een zwaar hersteltekort hoort er altijd bij: daar leunt de rest op.
+export function winstVlakken(p: Persoon): { d: Dim; s: number }[] {
+  const lijst = DIMS.filter(d => d.id !== 'P').map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s).filter(x => x.s >= 40);
+  const top = lijst.slice(0, 2);
+  if (p.dims.H >= 65 && !top.some(x => x.d.id === 'H')) top[top.length - 1] = lijst.find(x => x.d.id === 'H')!;
+  return top;
+}
+
+// Balans: wat er op het werk op je afkomt tegenover hoe goed je herstelt, gelezen met regelruimte en privé erbij.
+export function balans(p: Persoon) {
+  const B = Math.round(WERK.reduce((s, id) => s + p.dims[id], 0) / WERK.length), H = p.dims.H;
+  const hoog = B >= 50, tekort = H >= 50;
+  let [kop, tekst] = hoog && tekort
+    ? ["Veel belasting, te weinig herstel", "Er komt veel op je af en je tankt te weinig bij. Dat houd je een tijd vol, maar niet onbeperkt. Begin bij je herstel: dat verander je sneller dan de hoeveelheid werk."]
+    : hoog
+    ? ["Veel belasting, en je herstel houdt het bij", "Er komt veel op je af, en je tankt genoeg bij. Dat is houdbaar. Je herstel is wel het eerste dat je moet beschermen als het nog drukker wordt."]
+    : tekort
+    ? ["Het zit niet in de hoeveelheid werk", "De belasting vanuit het werk is niet uitzonderlijk, maar je herstelt toch te weinig. De oorzaak ligt dan ergens anders."]
+    : ["Ruimte", "De belasting is te dragen en je herstelt goed. Je hebt reserve. De vraag is waar je die voor wilt gebruiken."];
+  if (hoog && p.dims.G >= 55) tekst += " Je hebt daarbij weinig regelruimte. Dat maakt dezelfde druk zwaarder, want je kunt zelf weinig bijsturen.";
+  if (hoog && p.dims.G < 40) tekst += " Je hebt wel veel regelruimte: je kunt zelf bijsturen, en dat maakt veel druk beter te dragen.";
+  if (!hoog && tekort) tekst += p.dims.P >= 50 ? " Bij jou vraagt privé op dit moment veel, en dat telt mee in je herstel." : p.dims.G >= 55 ? " Bij jou is de regelruimte krap: weinig kunnen bijsturen kost ook energie." : " Kijk naar wat onder de oppervlakte meeloopt.";
+  if (Math.abs(B - 50) < 6 || Math.abs(H - 50) < 6) tekst += " Je zit dicht bij een overgang: lees dit als richting, niet als uitkomst.";
+  return { B, H, kop, tekst };
+}
+
+// Eén beeld: werkbelasting (horizontaal) tegenover hersteltekort (verticaal). Stippen zijn teamleden, zonder naam.
+export function balansSvg(people: Persoon[], ik?: Persoon): string {
+  const X = (b: number) => 46 + b / 100 * 244, Y = (h: number) => 176 - h / 100 * 166;
+  const anderen = people.filter(q => q !== ik).map(q => { const b = balans(q); return `<circle cx="${X(b.B).toFixed(1)}" cy="${Y(b.H).toFixed(1)}" r="5" fill="#1d2430" opacity="${ik ? .22 : .8}" stroke="#fff" stroke-width="1"/>`; }).join('');
+  const mij = ik ? (() => { const b = balans(ik); return `<circle cx="${X(b.B).toFixed(1)}" cy="${Y(b.H).toFixed(1)}" r="7.5" fill="#1d2430" stroke="#fff" stroke-width="2"/>`; })() : '';
+  return `<svg class="balans" viewBox="0 0 300 204" role="img" aria-label="Werkbelasting tegenover hersteltekort">
+    <defs><linearGradient id="bgv" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e6f1df"/><stop offset=".5" stop-color="#fbf1cf"/><stop offset="1" stop-color="#fbe1d1"/></linearGradient>
+    <linearGradient id="bgh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".0"/><stop offset="1" stop-color="#e9ebef" stop-opacity=".55"/></linearGradient></defs>
+    <rect x="46" y="10" width="244" height="166" fill="url(#bgv)"/><rect x="46" y="10" width="244" height="166" fill="url(#bgh)"/>
+    <g font-size="8.5" fill="#5b6575"><text x="51" y="22">Niet de hoeveelheid werk</text><text x="285" y="22" text-anchor="end">Te weinig herstel</text>
+    <text x="51" y="171">Ruimte</text><text x="285" y="171" text-anchor="end">Houdbaar</text></g>
+    ${anderen}${mij}
+    <g font-size="9.5" fill="#1d2430" font-weight="700"><text x="168" y="194" text-anchor="middle">Belasting op het werk →</text>
+    <text transform="translate(34 93) rotate(-90)" text-anchor="middle">Hersteltekort →</text></g>
+  </svg>`;
+}
+
+const PLABEL: Record<string, string> = { P1: "wat er thuis geregeld en gedaan moet worden", P2: "beslissingen die zwaar wegen", P3: "een relatie die energie kost", P4: "wat mensen van je verwachten" };
+export function priveBlok(p: Persoon): string {
+  if (p.dims.P < 40) return '';
+  const waar = ITEMS.filter(it => it.d === 'P' && p.raw[it.id] >= 4).map(it => PLABEL[it.id]);
+  const lijst = waar.length > 1 ? waar.slice(0, -1).join(', ') + ' en ' + waar[waar.length - 1] : waar[0];
+  return '<div class="box"><b>Privé.</b> Ook thuis komt er op dit moment veel op je af' + (waar.length ? ', vooral in ' + lijst : '') + '. Dat telt mee in wat je kunt dragen. Het team ziet dit niet: jij bepaalt wat je ervan deelt.</div>';
+}
+
+function rijen(p: Persoon, tm: Record<string, number> | null) {
+  return GROEPEN.map(g => '<div class="groep">' + g.kop + '</div>' + g.ids.map(id => {
+    const d = DIMS.find(x => x.id === id)!;
+    return '<div class="dimrow"><div class="nm">' + d.naam + '</div>' + balk(id, p.dims[id], tm && id !== 'P' ? tm[id] : null) + scoreHtml(id, p.dims[id]) + '</div>';
+  }).join('')).join('');
+}
+export { rijen };
+
 function indPage(p: Persoon, tm: Record<string, number>, people: Persoon[], team: string, datum: string) {
   const showTeam = people.length >= 4;
   let h = '<div class="page ind">' + dots;
   h += '<h1>Waar zit je druk?</h1><div class="meta">' + esc(p.naam) + (team ? ' · ' + esc(team) : '') + (datum ? ' · ' + esc(datum) : '') + '</div>';
-  h += '<p class="lead">Druk hoort bij je rol. Dit profiel laat niet zien óf je druk ervaart, maar waar die zich ophoopt en of je herstel het bijhoudt. Hoe hoger de score, hoe meer last op dat vlak.</p>';
-  DIMS.forEach(d => {
-    const s = p.dims[d.id], [bl, bc, col] = band(s);
-    h += '<div class="dimrow"><div class="nm">' + d.naam + '</div><div class="track"><div class="fill" style="width:' + Math.max(s, 2) + '%;background:' + col + '"></div>' + (showTeam ? '<div class="tri" style="left:' + tm[d.id] + '%"></div>' : '') + '</div><div class="score"><b>' + s + '</b><span class="band ' + bc + '">' + bl + '</span></div><div class="ds">' + d.wat + '</div></div>';
-  });
-  h += '<div class="legend">Groen: ruimte (0–39) · Geel: voelbaar (40–64) · Oranje: zwaar (65–100)' + (showTeam ? ' · ▼ teamgemiddelde' : '') + '</div>';
-
+  h += '<p class="lead">Druk hoort bij je rol. Dit profiel laat zien waar die zich ophoopt, hoeveel je zelf kunt bijsturen en of je herstel het bijhoudt.</p>';
+  h += rijen(p, showTeam ? tm : null);
+  h += '<div class="legend">' + LEGENDA + (showTeam ? ' ▼ is het teamgemiddelde.' : '') + '</div>';
   const bal = balans(p);
   h += '<div class="box"><b>Balans: ' + bal.kop.toLowerCase() + '.</b> ' + bal.tekst + '</div>';
-  const top = winstVlakken(p).map(x => [x.d, x.s] as [Dim, number]);
+  const top = winstVlakken(p);
   h += '<h2>Hier zit de meeste winst</h2>';
-  if (!top.length) h += '<p>Geen van de zes vlakken springt eruit. Kijk in het gesprek vooral naar wat je nu goed doet: dat is iets om vast te houden als de druk toeneemt.</p>';
-  top.forEach(([d, s]) => {
-    h += '<div class="win"><h3 style="margin-top:0">' + d.naam + ' · ' + s + '</h3><ul>' + tipsVoor(p, d.id).map(t => '<li>' + t + '</li>').join("") + '</ul></div>';
+  if (!top.length) h += '<p>Geen vlak springt eruit. Kijk in het gesprek vooral naar wat je nu goed doet: dat wil je vasthouden als de druk toeneemt.</p>';
+  top.forEach(({ d, s }) => {
+    h += '<div class="win"><h3 style="margin-top:0">' + d.naam + ' · ' + toon(d.id, s).val + '</h3><ul>' + tipsVoor(p, d.id).map(t => '<li>' + t + '</li>').join("") + '</ul></div>';
   });
-
-  const wp1 = p.raw.O5, wp2 = p.raw.V6;
-  if (wp1 >= 4 || wp2 >= 4) {
-    h += '<div class="box"><b>Werk en privé.</b> ';
-    const parts: string[] = [];
-    if (wp1 >= 4) parts.push('Je geeft aan dat werk en privé bij jou om dezelfde tijd en energie concurreren');
-    if (wp2 >= 4) parts.push((parts.length ? 'en dat' : 'Je geeft aan dat') + ' je privéomstandigheden nu veel van je vragen');
-    h += parts.join(" ") + '. Dat is geen zwakte, maar wel informatie: je capaciteit is op dit moment anders dan je team misschien aanneemt. Bepaal zelf hoeveel je daarvan deelt.</div>';
-  }
+  h += priveBlok(p);
   if (p.open) h += '<div class="box"><b>Wat je zelf schreef:</b> “' + esc(p.open) + '”</div>';
   h += '<p style="margin:8px 0 0"><b>Om over na te denken.</b> Herken je dit beeld, en wat klopt er niet? Welke ene verandering zou de komende maand het meeste schelen? Wat heb je daarvoor nodig van je collega’s?</p>';
   h += '<div class="foot">' + FOOT + '</div></div>';
@@ -178,35 +227,37 @@ function teamPage(tm: Record<string, number>, people: Persoon[], team: string, d
   const n = people.length;
   let h = '<div class="page team">' + dots + '<h1>Teamoverzicht</h1><div class="meta">' + (team ? esc(team) + ' · ' : '') + n + ' deelnemers' + (datum ? ' · ' + esc(datum) : '') + '</div>';
   if (n < 4) h += '<p class="warn">Bij minder dan vier deelnemers zijn teamcijfers naar personen te herleiden. Laat dit overzicht dan niet zien.</p>';
-  h += '<p class="lead">Elke stip is één teamlid, zonder naam. De zwarte streep is het teamgemiddelde. Kijk naar twee dingen: waar liggen de stippen samen in het oranje (gedeelde spanning), en waar liggen ze ver uit elkaar (jullie ervaren hetzelfde werk heel verschillend)?</p>';
-  const flagged: typeof DIMS = [];
-  DIMS.forEach(d => {
-    const sc = people.map(p => p.dims[d.id]), lo = Math.min(...sc), hi = Math.max(...sc), heavy = sc.filter(s => s >= 65).length;
-    const shared = heavy >= n / 2 || tm[d.id] >= 60, spread = hi - lo >= 40;
-    if (shared) flagged.push(d);
-    h += '<div class="dimrow"><div class="nm">' + d.naam + '</div><div class="track">' + sc.map(s => '<div class="dot" style="left:' + s + '%"></div>').join("") + '<div class="mean" style="left:' + tm[d.id] + '%"></div></div><div class="score"><b>' + tm[d.id] + '</b> <span style="color:var(--muted)">(' + lo + '–' + hi + ')</span></div><div class="ds">' + (shared ? '<span class="flag f-s">gedeelde spanning</span>' : '') + (spread ? '<span class="flag f-u">uiteenlopend</span>' : '') + (heavy ? ' ' + heavy + ' van ' + n + ' in het oranje' : '') + '</div></div>';
+  h += '<p class="lead">Elke stip is één teamlid, zonder naam. De zwarte streep is het teamgemiddelde. Kijk naar twee dingen: waar liggen de stippen samen in het oranje (gedeelde spanning), en waar liggen ze ver uit elkaar (jullie ervaren hetzelfde werk heel verschillend)? Privé staat niet in dit overzicht.</p>';
+  const flagged: Dim[] = [];
+  GROEPEN.filter(g => g.ids[0] !== 'P').forEach(g => {
+    h += '<div class="groep">' + ({ T: 'Wat er op jullie afkomt · werk', G: 'Wat jullie ermee kunnen', H: 'Wat het met jullie doet' } as Record<string, string>)[g.ids[0]] + '</div>';
+    g.ids.forEach(id => {
+      const d = DIMS.find(x => x.id === id)!, rev = id === 'G', pos = (s: number) => rev ? 100 - s : s;
+      const sc = people.map(p => p.dims[id]), lo = Math.min(...sc), hi = Math.max(...sc), heavy = sc.filter(s => s >= 65).length;
+      const shared = heavy >= n / 2 || tm[id] >= 60, spread = hi - lo >= 40;
+      if (shared) flagged.push(d);
+      const a = pos(lo), b = pos(hi);
+      h += '<div class="dimrow"><div class="nm">' + d.naam + '</div><div class="track' + (rev ? ' rev' : '') + '">' + sc.map(s => '<div class="dot" style="left:' + pos(s) + '%"></div>').join("") + '<div class="mean" style="left:' + pos(tm[id]) + '%"></div></div><div class="score"><b>' + pos(tm[id]) + '</b> <span style="color:var(--muted)">(' + Math.min(a, b) + '–' + Math.max(a, b) + ')</span></div><div class="ds">' + (shared ? '<span class="flag f-s">gedeelde spanning</span>' : '') + (spread ? '<span class="flag f-u">uiteenlopend</span>' : '') + (heavy ? ' ' + heavy + ' van ' + n + (rev ? ' krap' : ' in het oranje') : '') + '</div></div>';
+    });
   });
-  h += '<div class="legend">Groen: ruimte (0–39) · Geel: voelbaar (40–64) · Oranje: zwaar (65–100). Tussen haakjes: laagste en hoogste score.</div>';
-
-  h += '<h2>Belasting en herstel</h2><div class="balansrij">' + balansSvg(people) + '<div><p>Horizontaal staat wat er op iemand afkomt: het gemiddelde van taak-, beslis-, relatie- en rollast. Verticaal staat het hersteltekort.</p><p><b>Rechtsonder is houdbaar:</b> veel druk, en het herstel houdt het bij. <b>Rechtsboven niet:</b> daar teert iemand in.</p><p><b>Voor het gesprek:</b> wat doen de mensen rechtsonder anders dan de mensen rechtsboven? En wat maakt dat mogelijk?</p></div></div>';
+  h += '<div class="legend">' + LEGENDA + ' Tussen haakjes: laagste en hoogste score.</div>';
   h += '<div class="foot">' + FOOT + '</div></div><div class="page team">' + dots + '<h1>Teamoverzicht · vervolg</h1><div class="meta">' + (team ? esc(team) + ' · ' : '') + n + ' deelnemers</div>';
+  h += '<h2>Belasting en herstel</h2><div class="balansrij">' + balansSvg(people) + '<div><p>Horizontaal staat wat er op het werk op iemand afkomt: het gemiddelde van taak-, beslis-, relatie- en rollast. Verticaal staat het hersteltekort.</p><p><b>Rechtsonder is houdbaar:</b> veel druk, en het herstel houdt het bij. <b>Rechtsboven niet:</b> daar teert iemand in.</p><p><b>Voor het gesprek:</b> wat doen de mensen rechtsonder anders dan de mensen rechtsboven? En wat maakt dat mogelijk?</p></div></div>';
 
-  // Items with most shared agreement
-  const it = ITEMS.filter(x => !x.wp).map(x => ({ x, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
-  h += '<h2>Waar het team zich het meest in herkent</h2><table class="items">' + it.map(o => '<tr><td>' + (o.x.rev ? '<i>(omgekeerd)</i> ' : '') + esc(o.x.q) + '</td><td class="p">' + o.pct + '%</td></tr>').join("") + '</table>';
-  h += '<div class="legend">Percentage dat de last-kant koos: “grotendeels/helemaal waar” of “een paar keer per week/dagelijks”. Bij omgekeerde uitspraken telt juist het tegendeel.</div>';
+  const it = ITEMS.filter(x => x.d !== 'P').map(x => ({ x, pct: Math.round(people.filter(p => p.load[x.id] >= 4).length / n * 100) })).sort((a, b) => b.pct - a.pct).slice(0, 6);
+  h += '<h2>Waar het team zich het meest in herkent</h2><table class="items">' + it.map(o => '<tr><td>' + (o.x.rev ? '<i>(niet waar voor)</i> ' : '') + esc(o.x.q) + '</td><td class="p">' + o.pct + '%</td></tr>').join("") + '</table>';
+  h += '<div class="legend">Percentage dat de last-kant koos. Bij “niet waar voor” is het het percentage dat de uitspraak niet of nauwelijks op zichzelf van toepassing vindt.</div>';
 
-  const wpA = people.filter(p => p.raw.O5 >= 4).length, wpB = people.filter(p => p.raw.V6 >= 4).length;
-  // Privéomstandigheden alleen noemen als het niet naar één persoon te herleiden is
-  h += '<div class="box"><b>Werk en privé.</b> ' + wpA + ' van ' + n + ' zeggen dat werk en privé om dezelfde tijd en energie concurreren.' + (n >= 5 && wpB >= 2 ? ' ' + wpB + ' van ' + n + ' zeggen dat hun privéomstandigheden nu veel vragen.' : '') + ' Deze twee uitspraken tellen niet mee in de zes vlakken.</div>';
+  // Privé alleen noemen als het niet naar één persoon te herleiden is
+  const pr = people.filter(p => p.dims.P >= 50).length;
+  if (n >= 5 && pr >= 2) h += '<div class="box"><b>Privé.</b> Bij ' + pr + ' van de ' + n + ' vraagt privé op dit moment veel. Wie dat zijn, staat alleen in hun eigen rapport.</div>';
 
-  const focus = flagged.length ? flagged.slice(0, 3) : DIMS.slice().sort((a, b) => tm[b.id] - tm[a.id]).slice(0, 2);
+  const focus = flagged.length ? flagged.slice(0, 3) : DIMS.filter(d => d.id !== 'P').sort((a, b) => tm[b.id] - tm[a.id]).slice(0, 2);
   h += '<h2>' + (flagged.length ? 'Voor het gesprek' : 'Voor het gesprek: de twee hoogste') + '</h2>';
   focus.forEach(d => { h += '<div class="win"><h3 style="margin-top:0">' + d.naam + '</h3><p><b>Gespreksvraag:</b> ' + TXT[d.id].vraag + '</p><p><b>Mogelijke teamafspraak:</b> ' + TXT[d.id].team + '</p></div>'; });
   h += '<div class="foot">' + FOOT + '</div></div>';
   return h;
 }
-
 
 export function rapportHtml(people: Persoon[], team: string, datum: string): string {
   if (!people.length) return '';
