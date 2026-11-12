@@ -1,4 +1,5 @@
-// Unload teamversie — itempool v0.1 (niet gevalideerd)
+// Unload teamversie — itempool v0.2 (niet gevalideerd)
+// v0.2: R1 en H3 herschreven; O5 en V6 (werk/privé) tellen niet meer mee in een vlakscore.
 export const SCALES: Record<string, string[]> = {
   W: ["Helemaal niet waar", "Nauwelijks waar", "Deels waar", "Grotendeels waar", "Helemaal waar"],
   F: ["(Bijna) nooit", "Een paar keer per maand", "Wekelijks", "Een paar keer per week", "(Bijna) dagelijks"],
@@ -11,9 +12,9 @@ export const DIMS: Dim[] = [
   { id: "T", naam: "Taaklast", wat: "Het gewicht van het werk zelf: hoeveel, hoe complex, hoe versnipperd." },
   { id: "D", naam: "Beslislast", wat: "Hoeveel beslissingen je draagt, hoe zwaar ze zijn en wat ze aan het eind van de dag kosten." },
   { id: "R", naam: "Relatielast", wat: "Het gewicht van mensen: overleg, lastige relaties en de energie die het kost om je professioneel te houden." },
-  { id: "O", naam: "Rollast", wat: "Hoeveel petten je draagt, hoe vaak je schakelt en hoe helder de grenzen zijn — ook tussen werk en privé." },
-  { id: "H", naam: "Hersteltekort", wat: "Hoe goed je bijtankt: slaap, loslaten en opladen. Een hoge score betekent wéinig herstel." },
-  { id: "V", naam: "Verborgen last", wat: "Wat onder de oppervlakte meeloopt: open eindjes, piekeren, onderhuidse zorg en privédruk." }
+  { id: "O", naam: "Rollast", wat: "Hoeveel petten je draagt, hoe vaak je schakelt en hoe helder de grenzen zijn." },
+  { id: "H", naam: "Hersteltekort", wat: "Hoe goed je bijtankt: slaap, energie en opladen. Een hoge score betekent wéinig herstel." },
+  { id: "V", naam: "Verborgen last", wat: "Wat onder de oppervlakte meeloopt: open eindjes, piekeren en onderhuidse zorg." }
 ];
 
 // rev:true = omgekeerd gescoord (hoog antwoord = weinig last)
@@ -31,7 +32,7 @@ export const ITEMS: Item[] = [
   { id: "D4", d: "D", s: "W", q: "Er liggen beslissingen bij mij die ik al langer voor me uitschuif." },
   { id: "D5", d: "D", s: "F", q: "Ik moet beslissen zonder de informatie die ik eigenlijk nodig heb." },
 
-  { id: "R1", d: "R", s: "W", q: "Mijn agenda bestaat grotendeels uit overleg en gesprekken met anderen." },
+  { id: "R1", d: "R", s: "W", q: "Tussen gesprekken door heb ik geen moment om even op adem te komen." },
   { id: "R2", d: "R", s: "F", q: "In een gesprek laat ik een andere stemming zien dan ik op dat moment voel." },
   { id: "R3", d: "R", s: "W", q: "Er is op dit moment een werkrelatie die me veel energie kost." },
   { id: "R4", d: "R", s: "W", q: "Na een lastig gesprek heb ik tijd nodig voordat ik weer helder ben voor het volgende." },
@@ -45,7 +46,7 @@ export const ITEMS: Item[] = [
 
   { id: "H1", d: "H", s: "NACHT", q: "Hoeveel nachten per week slaap je minder dan je nodig hebt?" },
   { id: "H2", d: "H", s: "F", rev: true, q: "Ik word uitgerust wakker." },
-  { id: "H3", d: "H", s: "W", rev: true, q: "Buiten werktijd kan ik het werk echt loslaten." },
+  { id: "H3", d: "H", s: "W", rev: true, q: "Aan het eind van een werkdag heb ik nog energie over voor iets anders." },
   { id: "H4", d: "H", s: "W", rev: true, q: "Na een vrij weekend voel ik me weer opgeladen." },
   { id: "H5", d: "H", s: "W", q: "Dingen die ik normaal makkelijk aankan, irriteren me nu sneller." },
 

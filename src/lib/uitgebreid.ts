@@ -1,5 +1,5 @@
 import { DIMS, ITEMS, SCALES } from './items';
-import { TXT, band, esc, teamMeans, type Persoon } from './rapport';
+import { band, esc, teamMeans, balans, balansSvg, tipsVoor, winstVlakken, type Persoon } from './rapport';
 
 // Betekenis per vlak en per band: zwaar (≥65), voelbaar (40–64), ruimte (<40)
 const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
@@ -19,17 +19,17 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
     r: 'Het contact met anderen kost je relatief weinig. Waarschijnlijk geeft het je eerder energie.'
   },
   O: {
-    z: 'Je draagt veel petten, of de grenzen ertussen zijn onduidelijk, ook tussen werk en privé. Botsende verwachtingen en verantwoordelijkheid zonder invloed kosten vaak meer dan drukte.',
+    z: 'Je draagt veel petten, of de grenzen ertussen zijn onduidelijk. Botsende verwachtingen en verantwoordelijkheid zonder invloed kosten vaak meer dan drukte.',
     v: 'Je schakelt regelmatig tussen rollen, maar de grenzen zijn redelijk helder. Houd in de gaten waar verwachtingen gaan botsen.',
     r: 'Je rol is helder en je hoeft weinig te schakelen. Dat is een sterke basis.'
   },
   H: {
-    z: 'Je herstel houdt de druk niet bij: je slaapt te weinig, wordt niet uitgerust wakker of kunt het werk moeilijk loslaten. Op dit vlak leunt alles. Bij een tekort worden de andere vlakken vanzelf zwaarder.',
+    z: 'Je herstel houdt de druk niet bij: je slaapt te weinig, wordt niet uitgerust wakker of hebt aan het eind van de dag niets meer over. Op dit vlak leunt alles. Bij een tekort worden de andere vlakken vanzelf zwaarder.',
     v: 'Je herstel is wisselend. Meestal laad je op, maar niet altijd genoeg. Dit is het eerste vlak dat wegzakt als de druk toeneemt.',
     r: 'Je laadt goed op. Dat is je buffer voor drukke periodes. Ga er zuinig mee om.'
   },
   V: {
-    z: 'Er loopt veel onder de oppervlakte mee: open eindjes in je hoofd, piekeren in je vrije tijd, onderhuidse zorg of privédruk. Dit is de last die anderen het minst zien, en die je zelf vaak pas opmerkt als hij er al een tijd is.',
+    z: 'Er loopt veel onder de oppervlakte mee: open eindjes in je hoofd, piekeren in je vrije tijd of onderhuidse zorg. Dit is de last die anderen het minst zien, en die je zelf vaak pas opmerkt als hij er al een tijd is.',
     v: 'Er loopt wat mee onder de oppervlakte, maar het overheerst niet. Opschrijven en uitspreken houdt dit meestal klein.',
     r: 'Er loopt weinig onder de oppervlakte mee. Je hoofd is relatief vrij.'
   }
@@ -55,7 +55,7 @@ function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
   const s = p.dims[dId];
   const [bl, bc] = band(s);
   const tekst = s >= 65 ? BETEKENIS[dId].z : s >= 40 ? BETEKENIS[dId].v : BETEKENIS[dId].r;
-  const zwaar = ITEMS.filter(it => it.d === dId && p.load[it.id] >= 4)
+  const zwaar = ITEMS.filter(it => it.d === dId && !it.wp && p.load[it.id] >= 4)
     .sort((a, b) => p.load[b.id] - p.load[a.id]).slice(0, 2);
   let h = `<div class="dim">
     <div class="dimhead"><h3>${d.naam}</h3><div class="score"><b>${s}</b><span class="band ${bc}">${bl}</span></div></div>
@@ -65,7 +65,7 @@ function dimDetail(p: Persoon, dId: string, tm: Record<string, number> | null) {
   const regel = (it: typeof ITEMS[number]) =>
     `<div class="a">“${esc(it.q)}” <span class="jij">${SCALES[it.s][p.raw[it.id] - 1].toLowerCase()}</span></div>`;
   if (s < 40) {
-    const goed = ITEMS.filter(it => it.d === dId && p.load[it.id] <= 2)
+    const goed = ITEMS.filter(it => it.d === dId && !it.wp && p.load[it.id] <= 2)
       .sort((a, b) => p.load[a.id] - p.load[b.id]).slice(0, 2);
     if (goed.length) h += `<div class="antw goed"><span class="lbl">Wat goed gaat</span>` + goed.map(regel).join('') + `</div>`;
   } else if (zwaar.length) {
@@ -104,7 +104,8 @@ function voorblad(p: Persoon, team: string, datum: string) {
 export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: string, datum: string): string {
   const tm = people.length >= 4 ? teamMeans(people) : null;
   const gesorteerd = DIMS.map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s);
-  const top = gesorteerd.filter(x => x.s >= 40).slice(0, 2);
+  const top = winstVlakken(p);
+  const bal = balans(p);
   const ruimte = gesorteerd.filter(x => x.s < 40);
   const voornaam = esc(p.naam.split(' ')[0]);
   const T = 4; // genummerde pagina's na het voorblad
@@ -136,6 +137,8 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
       return `<div class="orow"><div class="nm">${d.naam}</div>${balk(s, tm ? tm[d.id] : null)}<div class="score"><b>${s}</b><span class="band ${bc}">${bl}</span></div></div>`;
     }).join('') + `</div>
     <div class="samenv">${samenvatting}</div>
+    <h2>Belasting en herstel</h2>
+    <div class="balansrij">${balansSvg(tm ? people : [p], p)}<div><p><b>${bal.kop}.</b> ${bal.tekst}</p><p class="klein">De grote stip ben jij${tm ? ', de lichte stippen zijn je teamgenoten, zonder naam' : ''}. Horizontaal staat wat er op je afkomt: het gemiddelde van taak-, beslis-, relatie- en rollast. Verticaal staat je hersteltekort.</p></div></div>
     ${foot(p, 1, T)}</div>`;
 
   // Pagina 2 en 3: de zes vlakken
@@ -150,7 +153,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
   if (top.length && nergensZwaar) h += `<p>Niets is bij jou zwaar. Zie dit dus als onderhoud, geen reparatie: kleine dingen die voorkomen dat deze vlakken oplopen als het drukker wordt.</p>`;
   if (!top.length) h += `<p>Geen vlak springt eruit. Kijk vooral naar wat je nu goed doet: dat wil je vasthouden als de druk toeneemt.</p>`;
   top.forEach(({ d, s }) => {
-    h += `<div class="win"><h3>${d.naam} · ${s}</h3><ul>${TXT[d.id].tips.map(t => `<li>${t}</li>`).join('')}</ul></div>`;
+    h += `<div class="win"><h3>${d.naam} · ${s}</h3><p class="klein">Gekozen bij de uitspraken waarop je het zwaarst scoorde.</p><ul>${tipsVoor(p, d.id).map(t => `<li>${t}</li>`).join('')}</ul></div>`;
   });
   if (ruimte.length) {
     h += `<div class="win bron"><h3>Wat je vasthoudt</h3><p>${(t => t.charAt(0).toUpperCase() + t.slice(1))(lijst(ruimte.map(x => x.d.naam.toLowerCase())))} ${ruimte.length === 1 ? 'is' : 'zijn'} op dit moment een bron van ruimte. Als de druk toeneemt, zijn dit de vlakken die je wilt beschermen. Wat doe je hier nu dat werkt, en wat zou je als eerste laten vallen als het druk wordt?</p></div>`;
@@ -159,7 +162,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
     const delen: string[] = [];
     if (p.raw.O5 >= 4) delen.push('werk en privé bij jou om dezelfde tijd en energie concurreren');
     if (p.raw.V6 >= 4) delen.push('je privéomstandigheden nu veel van je vragen');
-    h += `<div class="box"><b>Werk en privé.</b> Je geeft aan dat ${delen.join(', en dat ')}. Dat is geen zwakte, wel informatie: je capaciteit is nu anders dan je team misschien aanneemt. Jij bepaalt hoeveel je daarvan deelt.</div>`;
+    h += `<div class="box"><b>Werk en privé.</b> Je geeft aan dat ${delen.join(', en dat ')}. Dat is geen zwakte, wel informatie: je capaciteit is nu anders dan je team misschien aanneemt. Deze uitspraken tellen niet mee in de zes vlakken, en jij bepaalt hoeveel je ervan deelt.</div>`;
   }
   if (p.open) h += `<div class="box"><b>Wat je zelf schreef.</b> “${esc(p.open)}”</div>`;
   if (p.notitie) h += `<div class="noot"><span class="lbl">Toelichting van Govert</span><p>${esc(p.notitie).replace(/\n/g, '<br>')}</p></div>`;

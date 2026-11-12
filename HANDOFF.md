@@ -21,6 +21,15 @@ Uitgangspunt in alle teksten: **druk hoort bij een directierol.** De vraag is ni
 - Teamoverzicht: anonieme stippen per vlak, teamgemiddelde, de vlaggen "gedeelde spanning" (minstens de helft zwaar, of een gemiddelde van 60 of hoger) en "uiteenlopend" (spreiding van 40 of meer), de top-4 uitspraken waarin het team zich herkent, en per aandachtspunt een gespreksvraag plus een mogelijke teamafspraak. Onder 4 deelnemers verschijnt een waarschuwing over herleidbaarheid.
 - **Verander de volgorde van `ITEMS` in `src/lib/items.ts` niet meer** zodra er antwoorden binnen zijn: de antwoorden worden opgeslagen als een reeks van 31 cijfers in die volgorde.
 
+## Review november 2026 (itempool v0.2)
+- **Balans toegevoegd:** belasting (gemiddelde van taak-, beslis-, relatie- en rollast) tegenover hersteltekort, als vier kwadranten. Staat als zin in het sessierapport, als figuur in het uitgebreide rapport (eigen stip tussen anonieme teamstippen) en als figuur in het teamoverzicht. Functies `balans` en `balansSvg` in `src/lib/rapport.ts`.
+- **Suggesties per uitspraak:** `ITEMTIP` bevat één suggestie per vraag. `tipsVoor` kiest de suggesties bij de uitspraken waarop iemand het zwaarst scoort. De algemene tips in `TXT` worden niet meer in de rapporten gebruikt.
+- **Werk en privé (O5, V6) telt niet meer mee in een vlakscore.** Elk vlak heeft nu vijf items. Het eigen blok blijft.
+- **R1 en H3 herschreven.** R1 mat een kenmerk van de functie (agenda vol overleg), H3 overlapte met V2 (loslaten).
+- **Hersteltekort staat altijd bij de winstpunten als het zwaar is** (`winstVlakken`).
+- **Teamoverzicht is twee pagina's.** Het aantal mensen met zware privéomstandigheden staat er alleen bij vijf of meer deelnemers en minstens twee personen.
+- Mislukte inlogpoging op /admin wacht 0,8 seconde.
+
 ## Techniek
 - Next.js 14 (App Router, TypeScript) op Vercel, met Supabase (Postgres, regio EU) dat alleen via de server benaderd wordt met de service-role-sleutel. RLS staat aan, zonder policies.
 - Het is dezelfde opzet als Goverts Bever/Nextpedition-app (repo govert1970/Nextpedition). Supabase mag hetzelfde project zijn, want de tabellen hebben het prefix `dm_`.
