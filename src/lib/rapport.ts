@@ -162,7 +162,7 @@ export function balans(p: Persoon) {
     ? ["Het zit niet in de hoeveelheid werk", "De belasting vanuit het werk is niet uitzonderlijk, maar je herstelt toch te weinig. De oorzaak ligt dan ergens anders."]
     : ["Ruimte", "De belasting is te dragen en je herstelt goed. Je hebt reserve. De vraag is waar je die voor wilt gebruiken."];
   if (hoog && p.dims.G >= 55) tekst += " Je hebt daarbij weinig regelruimte. Dat telt apart mee: wie weinig kan bijsturen, houdt druk doorgaans minder goed vol.";
-  if (hoog && p.dims.G < 40) tekst += " Je hebt wel veel regelruimte. Dat is een hulpbron op zich: je kunt zelf bijsturen.";
+  if (hoog && p.dims.G < 40) tekst += " Je hebt wel veel regelruimte: je kunt zelf bijsturen. De vraag is dan wat maakt dat je die ruimte nu niet gebruikt om de druk te temperen.";
   if (!hoog && tekort) tekst += p.dims.P >= 50 ? " Bij jou vraagt privé op dit moment veel, en dat telt mee in je herstel." : p.dims.G >= 55 ? " Bij jou is de regelruimte krap: weinig kunnen bijsturen kost ook energie." : " Kijk naar wat onder de oppervlakte meeloopt.";
   if (Math.abs(B - 50) < 6 || Math.abs(H - 50) < 6) tekst += " Je zit dicht bij een overgang: lees dit als richting, niet als uitkomst.";
   return { B, H, kop, tekst };
@@ -221,5 +221,11 @@ export function teamCijfers(people: Persoon[]) {
   const pr = people.filter(p => p.dims.P >= 50).length;
   const gedeeld = rijen.filter(r => r.gedeeld);
   const focus = (gedeeld.length ? gedeeld : rijen.slice().sort((a, b) => b.last - a.last).slice(0, 2)).slice(0, 3).map(r => ({ naam: r.d.naam, vraag: TXT[r.d.id].vraag, afspraak: TXT[r.d.id].team }));
+  // Veel druk en toch veel regelruimte: dan is de vraag waarom het team die ruimte niet gebruikt
+  const werkdruk = rijen.filter(r => WERK.includes(r.d.id)).reduce((t, r) => t + r.last, 0) / WERK.length;
+  if (werkdruk >= 50 && tm.G < 40) {
+    focus.unshift({ naam: 'Regelruimte', vraag: 'We hebben veel regelruimte en toch veel druk. Wat maakt dat we die ruimte niet gebruiken?', afspraak: 'Ieder noemt één ding dat hij uitstelt, overdraagt of laat. Spreek af dat niemand daarop wordt aangekeken.' });
+    focus.splice(3);
+  }
   return { n, rijen, herkenning, prive: n >= 5 && pr >= 2 ? pr : null, focus, punten: people.map(p => { const b = balans(p); return { B: b.B, H: b.H }; }) };
 }
