@@ -48,7 +48,18 @@ export default function Admin() {
   const klaar = leden.filter(d => d.ingevuld_op).length;
   const link = (t: string) => `${location.origin}/p/${t}`;
   const kopieer = async (tekst: string, wat: string) => {
-    try { await navigator.clipboard.writeText(tekst); setMsg(wat + ' gekopieerd.'); } catch { setMsg('Kopiëren lukte niet. Selecteer de link handmatig.'); }
+    let ok = false;
+    try { await navigator.clipboard.writeText(tekst); ok = true; } catch { /* val terug op de oude manier */ }
+    if (!ok) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = tekst; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch { ok = false; }
+    }
+    setMsg(ok ? wat + ' gekopieerd.' : 'Kopiëren lukte niet. Klik op de link om hem te openen, of selecteer hem met de muis.');
   };
 
   return (
@@ -85,7 +96,7 @@ export default function Admin() {
                     </details>
                   </td>
                   <td>{d.ingevuld_op ? <span className="band b-r">ingevuld {new Date(d.ingevuld_op).toLocaleDateString('nl-NL')}</span> : <span className="band b-v">nog niet</span>}</td>
-                  <td style={{ fontSize: 11, color: 'var(--muted)', wordBreak: 'break-all' }}>{link(d.token)}</td>
+                  <td style={{ fontSize: 11, wordBreak: 'break-all' }}><a href={link(d.token)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--muted)' }}>{link(d.token)}</a></td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <button className="ghost" style={{ padding: '4px 10px' }} onClick={() => kopieer(link(d.token), 'Link van ' + d.naam)}>Kopieer link</button>{' '}
                     <button className="ghost" style={{ padding: '4px 10px' }} onClick={async () => { if (window.confirm?.(`${d.naam} verwijderen, inclusief antwoorden?`) !== false) { await post('/api/admin/deelnemers', { id: d.id }, 'DELETE'); laad(); } }}>×</button>
