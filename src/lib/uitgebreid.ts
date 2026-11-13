@@ -118,7 +118,7 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
       ? `Bij jou is geen enkel vlak zwaar. Relatief de meeste druk zit in <b>${lijst(hoogste.map(x => x.d.naam.toLowerCase()))}</b>.`
       : `Bij jou zit de meeste druk in <b>${lijst(hoogste.map(x => x.d.naam.toLowerCase()))}</b>.`)
     : `Bij jou springt geen vlak eruit: de druk is redelijk verdeeld en nergens zwaar.`;
-  if (ruimte.length) samenvatting += ` De meeste ruimte zit in <b>${lijst(ruimte.slice(-2).reverse().map(x => x.d.naam.toLowerCase()))}</b>.`;
+  if (ruimte.length) samenvatting += ` De meeste ruimte heb je bij <b>${lijst(ruimte.slice(-2).reverse().map(x => x.d.id === 'H' ? 'herstel' : x.d.naam.toLowerCase()))}</b>.`;
   samenvatting += p.dims.G >= 60 ? ` Je <b>regelruimte</b> is krap: je kunt zelf weinig bijsturen.` : p.dims.G < 40 ? ` Je <b>regelruimte</b> is ruim: je kunt zelf bijsturen.` : '';
   if (p.dims.P >= 50) samenvatting += ` Ook <b>privé</b> vraagt op dit moment veel.`;
 
