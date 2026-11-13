@@ -15,7 +15,7 @@ export const DIMS_EN: Record<string, { naam: string; wat: string }> = {
   R: { naam: "Relational load", wat: "What people at work ask of you: many meetings, a difficult working relationship, and staying professional while it feels different inside." },
   O: { naam: "Role load", wat: "The hats you wear: how often you switch, how clear your responsibility is and whether expectations clash." },
   P: { naam: "Private load", wat: "What comes at you at home: what needs arranging, decisions, relationships and expectations." },
-  G: { naam: "Room to manoeuvre", wat: "How much you can adjust yourself: setting your own diary, saying no, handing work over and falling back on others. High is good here." },
+  G: { naam: "Discretionary space", wat: "How much you can adjust yourself: setting your own diary, saying no, handing work over and falling back on others. High is good here." },
   H: { naam: "Recovery deficit", wat: "How much recovery you are missing: sleep, energy at the end of the day and recharging at the weekend. High means little recovery." },
   V: { naam: "Hidden load", wat: "What runs along beneath the surface: loose ends in your head, worrying outside working hours and a nagging concern." }
 };
