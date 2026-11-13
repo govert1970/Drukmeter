@@ -65,7 +65,7 @@ export default function Admin() {
   return (
     <div className="ctrl" style={{ maxWidth: 900 }}>
       <div className="dots"><i style={{ background: 'var(--orange)' }} /><i style={{ background: 'var(--green)' }} /><i style={{ background: 'var(--yellow)' }} /><i style={{ background: 'var(--sky)' }} /></div>
-      <h1>Waar zit je druk? — facilitator</h1>
+      <h1>Pressure Map — facilitator</h1>
 
       <div className="row">
         <select value={sel} onChange={e => setSel(e.target.value)} style={{ font: 'inherit', padding: '8px 10px', borderRadius: 8 }}>

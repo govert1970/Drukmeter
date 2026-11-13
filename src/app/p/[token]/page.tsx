@@ -58,6 +58,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
 
       {fase === 'intro' && (
         <section>
+          <div className="muted" style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}>Pressure Map</div>
           <h1>Waar zit je druk?</h1>
           <p>Hoi {naam.split(' ')[0]}. Druk hoort bij een rol in een directieteam. Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
           <div className="card small">

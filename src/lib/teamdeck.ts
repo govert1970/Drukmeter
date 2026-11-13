@@ -15,7 +15,7 @@ export async function maakTeamdeck(people: Persoon[], team: string, datum: strin
   const PptxGenJS = (await import('pptxgenjs')).default;
   const pres = new PptxGenJS();
   pres.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 inch
-  pres.title = 'Waar zit de druk? — ' + team;
+  pres.title = 'Pressure Map — ' + team;
   pres.theme = { headFontFace: FONT, bodyFontFace: FONT };
   const c = teamCijfers(people);
   const S = pres.ShapeType;
@@ -40,7 +40,7 @@ export async function maakTeamdeck(people: Persoon[], team: string, datum: strin
     const s = pres.addSlide(); s.background = { color: 'FFFFFF' };
     if (logo) s.addImage({ data: logo, x: 0.6, y: 0.45, w: 1.5, h: 1.39 });
     cirkel(s, 8.6, 0.5, 4.2, O); cirkel(s, 6.4, 3.0, 2.8, G); cirkel(s, 10.4, 4.6, 2.2, B); cirkel(s, 6.9, 1.2, 1.25, Y);
-    s.addText('TEAMBEELD', { x: 0.6, y: 3.3, w: 6, h: 0.35, fontSize: 13, color: MUTED, charSpacing: 4, margin: 0, isTextBox: true });
+    s.addText('PRESSURE MAP · TEAMBEELD', { x: 0.6, y: 3.3, w: 6, h: 0.35, fontSize: 13, color: MUTED, charSpacing: 4, margin: 0, isTextBox: true });
     s.addText('Waar zit de druk?', { x: 0.6, y: 3.7, w: 6.2, h: 1.9, fontSize: 54, bold: true, color: INK, margin: 0, isTextBox: true, valign: 'top' });
     s.addText(team + (datum ? ' · ' + datum : '') + ' · ' + c.n + ' deelnemers', { x: 0.6, y: 6.2, w: 7, h: 0.4, fontSize: 16, color: MUTED, margin: 0, isTextBox: true });
     s.addText('Govert van Sandwijk · Time To Grow', { x: 0.6, y: 6.6, w: 7, h: 0.35, fontSize: 12, color: MUTED, margin: 0, isTextBox: true });

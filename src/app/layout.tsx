@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-export const metadata = { title: 'Waar zit je druk?', robots: { index: false, follow: false } };
+export const metadata = { title: 'Pressure Map', robots: { index: false, follow: false } };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
