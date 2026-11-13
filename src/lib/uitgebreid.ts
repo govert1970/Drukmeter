@@ -45,7 +45,7 @@ const BETEKENIS: Record<string, { z: string; v: string; r: string }> = {
   }
 };
 
-const dots = '<div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--sky)"></i></div>';
+const dots = '<img class="pg-logo" src="/ttg-logo.png" alt="Time To Grow"><div class="dots"><i style="background:var(--orange)"></i><i style="background:var(--green)"></i><i style="background:var(--yellow)"></i><i style="background:var(--sky)"></i></div>';
 
 function foot(p: Persoon, nr: number, totaal: number) {
   return `<div class="foot"><span>Pressure Map · ${esc(p.naam)} · Gespreksinstrument, geen gevalideerde test.</span><span>Time To Grow · Govert van Sandwijk · ${nr}/${totaal}</span></div>`;
@@ -87,8 +87,9 @@ function voorblad(p: Persoon, team: string, datum: string) {
       <circle cx="190" cy="160" r="45" fill="#F5D508"/>
     </svg>
     <div class="cv-title">
-      <div class="kicker">Pressure Map · Persoonlijk profiel</div>
-      <h1>Waar zit<br>je druk?</h1>
+      <div class="kicker">Persoonlijk profiel</div>
+      <h1>Pressure Map</h1>
+      <div class="cv-vraag">Waar zit je druk?</div>
       <p class="cv-sub">Een beeld van waar de druk zich bij jou ophoopt, en of je herstel het bijhoudt.</p>
     </div>
     <div class="cv-who">

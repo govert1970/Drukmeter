@@ -131,3 +131,9 @@ svg.balans { width:100%; height:auto; display:block; }
 .laag .klein { margin:2px 0 6px; }
 .def { display:grid; grid-template-columns:128px 1fr; gap:10px; padding:5px 0; border-top:1px solid var(--line); }
 .def b { font-variant:small-caps; font-size:14.5px; }
+
+/* Naam van de tool groot, de vraag eronder; klein logo op vervolgpagina's */
+.cv-title h1 { margin-bottom:6px; }
+.cv-vraag { font-size:27px; font-weight:700; font-variant:small-caps; letter-spacing:.02em; margin:0 0 14px; }
+.page.ext { position:relative; }
+.pg-logo { position:absolute; top:5.5mm; right:16mm; width:11mm; height:auto; }
