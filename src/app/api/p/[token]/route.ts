@@ -5,10 +5,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(_req: Request, { params }: { params: { token: string } }) {
   if (!geldigToken(params.token)) return json({ fout: 'Deze link klopt niet.' }, 404);
-  const { data, error } = await db().from('dm_deelnemers').select('naam, ingevuld_op').eq('token', params.token).maybeSingle();
+  const { data, error } = await db().from('dm_deelnemers').select('naam, ingevuld_op, team_id').eq('token', params.token).maybeSingle();
   if (error) return json({ fout: 'Er ging iets mis bij het ophalen.' }, 500);
   if (!data) return json({ fout: 'Deze link klopt niet.' }, 404);
-  return json({ naam: data.naam, ingevuld: !!data.ingevuld_op });
+  const { data: team } = await db().from('dm_teams').select('*').eq('id', data.team_id).maybeSingle();
+  return json({ naam: data.naam, ingevuld: !!data.ingevuld_op, individueel: team?.individueel === true });
 }
 
 export async function POST(req: Request, { params }: { params: { token: string } }) {

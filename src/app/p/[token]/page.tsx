@@ -13,6 +13,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
   const [fase, setFase] = useState<Fase>('laden');
   const [naam, setNaam] = useState('');
   const [eerder, setEerder] = useState(false);
+  const [solo, setSolo] = useState(false);
   const [fout, setFout] = useState('');
   const [ant, setAnt] = useState<Record<string, number>>({});
   const [open, setOpen] = useState('');
@@ -24,7 +25,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
     fetch(`/api/p/${params.token}`).then(async r => {
       const d = await r.json();
       if (!r.ok) { setFout(d.fout || 'Deze link klopt niet.'); setFase('fout'); return; }
-      setNaam(d.naam); setEerder(d.ingevuld); setFase('intro');
+      setNaam(d.naam); setEerder(d.ingevuld); setSolo(d.individueel === true); setFase('intro');
     }).catch(() => { setFout('Geen verbinding. Probeer het later nog eens.'); setFase('fout'); });
   }, [params.token]);
 
@@ -60,10 +61,10 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
         <section>
           <div className="muted" style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}>Pressure Map</div>
           <h1>Waar zit je druk?</h1>
-          <p>Hoi {naam.split(' ')[0]}. Druk hoort bij een rol in een directieteam. Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
+          <p>Hoi {naam.split(' ')[0]}. {solo ? 'Druk hoort bij een verantwoordelijke rol.' : 'Druk hoort bij een rol in een directieteam.'} Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
           <div className="card small">
             <p style={{ marginTop: 0 }}><b>Wat het is, en wat niet.</b> Dit is een gespreksinstrument, geen gevalideerde test. Het geeft een beeld, geen oordeel. Er zijn geen goede of foute antwoorden.</p>
-            <p><b>Wie ziet wat.</b> Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.</p>
+            <p><b>Wie ziet wat.</b> Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. {solo ? 'Dat is alleen voor jou; niemand anders krijgt het te zien. We bespreken het samen.' : 'Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.'}</p>
             <p style={{ marginBottom: 0 }}><b>Hoe.</b> {ORDER.length} korte vragen, ongeveer 10 minuten. De laatste zes gaan over privé. Denk aan de afgelopen vier weken. Kies wat het eerst bij je opkomt.</p>
           </div>
           {eerder && <p className="small muted">Je hebt de vragenlijst al eens ingevuld. Als je hem opnieuw invult, tellen je nieuwe antwoorden.</p>}
@@ -95,7 +96,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
             <textarea maxLength={200} placeholder="Optioneel, maximaal 200 tekens" value={open} onChange={e => setOpen(e.target.value)} />
           </div>
           <label className="toest"><input type="checkbox" checked={ref} onChange={e => setRef(e.target.checked)} />
-            <span>Mijn antwoorden mogen zonder naam worden bewaard om deze vragenlijst te verbeteren. Niet mijn naam, mijn team of wat ik hierboven schreef. Dit is niet verplicht.</span></label>
+            <span>Mijn antwoorden mogen zonder naam worden bewaard om deze vragenlijst te verbeteren. Niet mijn naam, {solo ? 'mijn organisatie' : 'mijn team'} of wat ik hierboven schreef. Dit is niet verplicht.</span></label>
           <div className="row"><button className="primary" disabled={bezig} onClick={versturen}>{bezig ? 'Versturen…' : 'Versturen'}</button></div>
           {fout && <div className="err">{fout}</div>}
         </section>
@@ -104,7 +105,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
       {fase === 'klaar' && (
         <section>
           <h2>Dank je wel</h2>
-          <p>Je antwoorden zijn binnen. Je ziet je profiel in de sessie.</p>
+          <p>Je antwoorden zijn binnen. {solo ? 'Je ziet je profiel in ons gesprek.' : 'Je ziet je profiel in de sessie.'}</p>
         </section>
       )}
     </div>

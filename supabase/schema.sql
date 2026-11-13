@@ -41,3 +41,6 @@ create table if not exists dm_referentie (
 );
 alter table dm_referentie enable row level security;
 alter table dm_deelnemers add column if not exists referentie_gedeeld boolean not null default false;
+
+-- Individueel gebruik: een map met losse personen, zonder teambeeld.
+alter table dm_teams add column if not exists individueel boolean not null default false;

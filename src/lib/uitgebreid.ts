@@ -104,8 +104,9 @@ function voorblad(p: Persoon, team: string, datum: string) {
 }
 
 
-export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: string, datum: string): string {
-  const tm = people.length >= 4 ? teamMeans(people) : null;
+export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: string, datum: string, individueel = false): string {
+  const tm = !individueel && people.length >= 4 ? teamMeans(people) : null;
+  if (individueel) team = '';
   const last = DIMS.filter(d => !['P', 'G'].includes(d.id)).map(d => ({ d, s: p.dims[d.id] })).sort((a, b) => b.s - a.s);
   const hoogste = last.filter(x => x.s >= 40).slice(0, 2);
   const ruimte = last.filter(x => x.s < 40);
@@ -180,10 +181,15 @@ export function uitgebreidRapportHtml(p: Persoon, people: Persoon[], team: strin
     <div class="vraag"><b>Welke ene verandering zou de komende maand het meeste schelen?</b><div class="lijn"></div><div class="lijn"></div></div>
     <div class="vraag"><b>Wat heb je daarvoor nodig van je collega’s?</b><div class="lijn"></div><div class="lijn"></div></div>
     ${foot(p, 6, T)}</div>`;
+  if (individueel) h = h
+    .replace('Druk hoort bij een rol in een directieteam.', 'Druk hoort bij een verantwoordelijke rol.')
+    .replace(' Het team ziet dit niet: jij bepaalt wat je ervan deelt.', ' Jij bepaalt wat je ervan deelt.')
+    .split('Maak in het team expliciet').join('Maak met je collega’s expliciet')
+    .replace('voor het gesprek in de sessie', 'voor ons gesprek');
   return h;
 }
 
-export function uitgebreideRapportenHtml(people: Persoon[], team: string, datum: string): string {
+export function uitgebreideRapportenHtml(people: Persoon[], team: string, datum: string, individueel = false): string {
   const sorted = [...people].sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
-  return sorted.map(p => uitgebreidRapportHtml(p, sorted, team, datum)).join('');
+  return sorted.map(p => uitgebreidRapportHtml(p, individueel ? [p] : sorted, team, datum, individueel)).join('');
 }

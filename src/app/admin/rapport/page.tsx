@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { scoreOf, type Persoon } from '@/lib/rapport';
 import { uitgebreideRapportenHtml } from '@/lib/uitgebreid';
 
-type Team = { id: string; naam: string; sessiedatum: string };
+type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean };
 type Deelnemer = { team_id: string; naam: string; antwoorden: string | null; open_antwoord: string; notitie?: string };
 
 export default function Rapport() {
@@ -26,7 +26,7 @@ export default function Rapport() {
       const leden = (d.deelnemers as Deelnemer[]).filter(x => x.team_id === id);
       const people: Persoon[] = leden.filter(x => x.antwoorden).map(x => ({ ...scoreOf({ n: x.naam, a: x.antwoorden!, t: x.open_antwoord }), notitie: x.notitie || '' }));
       setTeam(t); setOpen(leden.length - people.length); setMensen(people);
-      setHtml(uitgebreideRapportenHtml(people, t.naam, t.sessiedatum));
+      setHtml(uitgebreideRapportenHtml(people, t.naam, t.sessiedatum, t.individueel === true));
       setMsg(people.length ? '' : 'Nog niemand heeft de vragenlijst ingevuld.');
     }).catch(() => setMsg('Geen verbinding.'));
   }, []);
@@ -50,18 +50,19 @@ export default function Rapport() {
     setBezig(false);
   }
 
+  const solo = team?.individueel === true;
   return (
     <>
       <div className="ctrl">
         <h1>Rapportage{team ? ' — ' + team.naam : ''}</h1>
-        {open > 0 && <p className="msg">Let op: {open} deelnemer(s) hebben nog niet ingevuld. Die tellen niet mee in het teambeeld.</p>}
+        {open > 0 && <p className="msg">Let op: {open} deelnemer(s) hebben nog niet ingevuld.{solo ? '' : ' Die tellen niet mee in het teambeeld.'}</p>}
         <div className="row">
           <button onClick={() => window.print()} disabled={!mensen.length}>Print persoonlijke rapporten</button>
-          <button onClick={presentatie} disabled={mensen.length < 4 || bezig}>{bezig ? 'Bezig…' : 'Download teampresentatie (.pptx)'}</button>
+          {!solo && <button onClick={presentatie} disabled={mensen.length < 4 || bezig}>{bezig ? 'Bezig…' : 'Download teampresentatie (.pptx)'}</button>}
           <a href="/admin"><button className="ghost">Terug</button></a>
         </div>
-        <p className="msg">Iedere deelnemer krijgt alleen het eigen rapport. Het teambeeld staat in de presentatie, zonder namen en zonder privé.</p>
-        {mensen.length > 0 && mensen.length < 4 && <p className="msg">Bij minder dan vier deelnemers is een teambeeld naar personen te herleiden. Daarom is er dan geen presentatie.</p>}
+        <p className="msg">{solo ? 'Individueel gebruik: ieder rapport staat op zichzelf, zonder vergelijking met anderen en zonder teambeeld.' : 'Iedere deelnemer krijgt alleen het eigen rapport. Het teambeeld staat in de presentatie, zonder namen en zonder privé.'}</p>
+        {!solo && mensen.length > 0 && mensen.length < 4 && <p className="msg">Bij minder dan vier deelnemers is een teambeeld naar personen te herleiden. Daarom is er dan geen presentatie.</p>}
         <p className="msg">Kies bij printen “Opslaan als PDF”, papierformaat A4, marges “geen”, en zet achtergrondafbeeldingen aan.</p>
         {msg && <p className="msg">{msg}</p>}
       </div>

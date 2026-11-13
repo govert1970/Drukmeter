@@ -2,7 +2,7 @@
 import '../rapport.css';
 import { useCallback, useEffect, useState } from 'react';
 
-type Team = { id: string; naam: string; sessiedatum: string };
+type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean };
 type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null; notitie?: string };
 
 export default function Admin() {
@@ -13,6 +13,7 @@ export default function Admin() {
   const [dn, setDn] = useState<Deelnemer[]>([]);
   const [sel, setSel] = useState('');
   const [nieuwTeam, setNieuwTeam] = useState('');
+  const [nieuwSolo, setNieuwSolo] = useState(false);
   const [namen, setNamen] = useState('');
 
   const laad = useCallback(async () => {
@@ -70,17 +71,19 @@ export default function Admin() {
       <div className="row">
         <select value={sel} onChange={e => setSel(e.target.value)} style={{ font: 'inherit', padding: '8px 10px', borderRadius: 8 }}>
           {teams.length === 0 && <option value="">Nog geen teams</option>}
-          {teams.map(t => <option key={t.id} value={t.id}>{t.naam}</option>)}
+          {teams.map(t => <option key={t.id} value={t.id}>{t.naam}{t.individueel ? ' (individueel)' : ''}</option>)}
         </select>
-        <input value={nieuwTeam} onChange={e => setNieuwTeam(e.target.value)} placeholder="Nieuw team" />
-        <button className="ghost" onClick={async () => { const d = await post('/api/admin/teams', { naam: nieuwTeam }); if (d) { setNieuwTeam(''); setSel(d.id); laad(); } }}>Team toevoegen</button>
+        <input value={nieuwTeam} onChange={e => setNieuwTeam(e.target.value)} placeholder={nieuwSolo ? 'Naam van de map, bijv. Coaching 2026' : 'Nieuw team'} />
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={nieuwSolo} onChange={e => setNieuwSolo(e.target.checked)} /> Individueel, geen team</label>
+        <button className="ghost" onClick={async () => { const d = await post('/api/admin/teams', { naam: nieuwTeam, individueel: nieuwSolo }); if (d) { setNieuwTeam(''); setNieuwSolo(false); setSel(d.id); laad(); } }}>{nieuwSolo ? 'Map toevoegen' : 'Team toevoegen'}</button>
       </div>
 
       {team && (
         <>
           <div className="row">
-            <label>Team <input defaultValue={team.naam} key={team.id + 'n'} onBlur={e => post('/api/admin/teams', { id: team.id, naam: e.target.value }, 'PATCH').then(laad)} /></label>
-            <label>Sessiedatum <input defaultValue={team.sessiedatum} key={team.id + 'd'} placeholder="bijv. 20 november 2026" onBlur={e => post('/api/admin/teams', { id: team.id, sessiedatum: e.target.value }, 'PATCH').then(laad)} /></label>
+            <label>{team.individueel ? 'Map' : 'Team'} <input defaultValue={team.naam} key={team.id + 'n'} onBlur={e => post('/api/admin/teams', { id: team.id, naam: e.target.value }, 'PATCH').then(laad)} /></label>
+            <label>{team.individueel ? 'Datum' : 'Sessiedatum'} <input defaultValue={team.sessiedatum} key={team.id + 'd'} placeholder="bijv. 20 november 2026" onBlur={e => post('/api/admin/teams', { id: team.id, sessiedatum: e.target.value }, 'PATCH').then(laad)} /></label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={team.individueel === true} onChange={e => post('/api/admin/teams', { id: team.id, individueel: e.target.checked }, 'PATCH').then(laad)} /> Individueel, geen team</label>
           </div>
 
           <h2>Deelnemers · {klaar} van {leden.length} ingevuld</h2>
@@ -112,7 +115,7 @@ export default function Admin() {
           <div className="row"><button className="ghost" onClick={async () => { const d = await post('/api/admin/deelnemers', { team_id: team.id, namen: namen.split('\n') }); if (d) { setNamen(''); laad(); } }}>Toevoegen</button></div>
 
           <div className="row" style={{ marginTop: 20 }}>
-            <a href={`/admin/rapport?team=${team.id}`}><button disabled={!klaar}>Rapporten en teampresentatie ({klaar})</button></a>
+            <a href={`/admin/rapport?team=${team.id}`}><button disabled={!klaar}>{team.individueel ? 'Rapporten' : 'Rapporten en teampresentatie'} ({klaar})</button></a>
             <button className="ghost" onClick={laad}>Vernieuwen</button>
           </div>
         </>
