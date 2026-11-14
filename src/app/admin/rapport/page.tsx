@@ -3,8 +3,9 @@ import '../../rapport.css';
 import { useEffect, useState } from 'react';
 import { scoreOf, type Persoon } from '@/lib/rapport';
 import { uitgebreideRapportenHtml } from '@/lib/uitgebreid';
+import { rolVan } from '@/lib/rol';
 
-type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean };
+type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean; rol?: string };
 type Deelnemer = { team_id: string; naam: string; antwoorden: string | null; open_antwoord: string; notitie?: string };
 
 export default function Rapport() {
@@ -26,7 +27,7 @@ export default function Rapport() {
       const leden = (d.deelnemers as Deelnemer[]).filter(x => x.team_id === id);
       const people: Persoon[] = leden.filter(x => x.antwoorden).map(x => ({ ...scoreOf({ n: x.naam, a: x.antwoorden!, t: x.open_antwoord }), notitie: x.notitie || '' }));
       setTeam(t); setOpen(leden.length - people.length); setMensen(people);
-      setHtml(uitgebreideRapportenHtml(people, t.naam, t.sessiedatum, t.individueel === true));
+      setHtml(uitgebreideRapportenHtml(people, t.naam, t.sessiedatum, t.individueel === true, rolVan(t.rol)));
       setMsg(people.length ? '' : 'Nog niemand heeft de vragenlijst ingevuld.');
     }).catch(() => setMsg('Geen verbinding.'));
   }, []);
@@ -41,7 +42,7 @@ export default function Rapport() {
         const b = await (await fetch('/ttg-logo.png')).blob();
         logo = await new Promise<string>((ok, fout) => { const fr = new FileReader(); fr.onload = () => ok(String(fr.result)); fr.onerror = fout; fr.readAsDataURL(b); });
       } catch { /* zonder logo verder */ }
-      const blob = await maakTeamdeck(mensen, team.naam, team.sessiedatum, logo);
+      const blob = await maakTeamdeck(mensen, team.naam, team.sessiedatum, logo, rolVan(team.rol));
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'Teambeeld ' + team.naam.replace(/[^\w\- ]+/g, '') + '.pptx';

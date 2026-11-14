@@ -44,3 +44,6 @@ alter table dm_deelnemers add column if not exists referentie_gedeeld boolean no
 
 -- Individueel gebruik: een map met losse personen, zonder teambeeld.
 alter table dm_teams add column if not exists individueel boolean not null default false;
+
+-- Soort rol: directie, management of professional. Bepaalt alleen de bewoording.
+alter table dm_teams add column if not exists rol text not null default 'directie';

@@ -2,6 +2,7 @@
 import '../../vragenlijst.css';
 import { useEffect, useState } from 'react';
 import { ITEMS, ORDER, SCALES } from '@/lib/items';
+import { opening, rolVan, type Rol } from '@/lib/rol';
 
 type Fase = 'laden' | 'fout' | 'intro' | 'vragen' | 'klaar';
 
@@ -14,6 +15,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
   const [naam, setNaam] = useState('');
   const [eerder, setEerder] = useState(false);
   const [solo, setSolo] = useState(false);
+  const [rol, setRol] = useState<Rol>('directie');
   const [fout, setFout] = useState('');
   const [ant, setAnt] = useState<Record<string, number>>({});
   const [open, setOpen] = useState('');
@@ -25,7 +27,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
     fetch(`/api/p/${params.token}`).then(async r => {
       const d = await r.json();
       if (!r.ok) { setFout(d.fout || 'Deze link klopt niet.'); setFase('fout'); return; }
-      setNaam(d.naam); setEerder(d.ingevuld); setSolo(d.individueel === true); setFase('intro');
+      setNaam(d.naam); setEerder(d.ingevuld); setSolo(d.individueel === true); setRol(rolVan(d.rol)); setFase('intro');
     }).catch(() => { setFout('Geen verbinding. Probeer het later nog eens.'); setFase('fout'); });
   }, [params.token]);
 
@@ -61,7 +63,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
         <section>
           <div className="muted" style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}>Pressure Map</div>
           <h1>Waar zit je druk?</h1>
-          <p>Hoi {naam.split(' ')[0]}. {solo ? 'Druk hoort bij een verantwoordelijke rol.' : 'Druk hoort bij een rol in een directieteam.'} Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
+          <p>Hoi {naam.split(' ')[0]}. {opening(rol, solo)} Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
           <div className="card small">
             <p style={{ marginTop: 0 }}><b>Wat het is, en wat niet.</b> Dit is een gespreksinstrument, geen gevalideerde test. Het geeft een beeld, geen oordeel. Er zijn geen goede of foute antwoorden.</p>
             <p><b>Wie ziet wat.</b> Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. {solo ? 'Dat is alleen voor jou; niemand anders krijgt het te zien. We bespreken het samen.' : 'Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.'}</p>

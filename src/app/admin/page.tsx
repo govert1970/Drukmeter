@@ -1,8 +1,9 @@
 'use client';
 import '../rapport.css';
+import { ROLLEN, rolVan } from '@/lib/rol';
 import { useCallback, useEffect, useState } from 'react';
 
-type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean };
+type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean; rol?: string };
 type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null; notitie?: string };
 
 export default function Admin() {
@@ -84,6 +85,7 @@ export default function Admin() {
             <label>{team.individueel ? 'Map' : 'Team'} <input defaultValue={team.naam} key={team.id + 'n'} onBlur={e => post('/api/admin/teams', { id: team.id, naam: e.target.value }, 'PATCH').then(laad)} /></label>
             <label>{team.individueel ? 'Datum' : 'Sessiedatum'} <input defaultValue={team.sessiedatum} key={team.id + 'd'} placeholder="bijv. 20 november 2026" onBlur={e => post('/api/admin/teams', { id: team.id, sessiedatum: e.target.value }, 'PATCH').then(laad)} /></label>
             <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={team.individueel === true} onChange={e => post('/api/admin/teams', { id: team.id, individueel: e.target.checked }, 'PATCH').then(laad)} /> Individueel, geen team</label>
+            <label>Soort rol <select value={rolVan(team.rol)} onChange={e => post('/api/admin/teams', { id: team.id, rol: e.target.value }, 'PATCH').then(laad)}>{ROLLEN.map(r => <option key={r.id} value={r.id}>{r.label}</option>)}</select></label>
           </div>
 
           <h2>Deelnemers · {klaar} van {leden.length} ingevuld</h2>

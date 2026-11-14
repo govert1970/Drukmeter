@@ -1,5 +1,6 @@
 // Teampresentatie als PowerPoint. Draait in de browser van de facilitator; er gaat niets naar een server.
 import { DIMS } from './items';
+import { rolTekst, type Rol } from './rol';
 import { teamCijfers, type Persoon } from './rapport';
 
 const INK = '1D2430', MUTED = '5B6575', LINE = 'E3E6EB', TINT = 'F4F6F8';
@@ -11,7 +12,7 @@ const LG = [230, 241, 223], LY = [251, 241, 207], LO = [251, 225, 209];
 // Lichte achtergrondkleur van de balk op positie 0..1: groen loopt over in geel en oranje
 function tint(t: number) { return t < .28 ? meng(LG, LG, 0) : t < .5 ? meng(LG, LY, (t - .28) / .22) : t < .56 ? meng(LY, LY, 0) : t < .78 ? meng(LY, LO, (t - .56) / .22) : meng(LO, LO, 0); }
 
-export async function maakTeamdeck(people: Persoon[], team: string, datum: string, logo: string | null): Promise<Blob> {
+export async function maakTeamdeck(people: Persoon[], team: string, datum: string, logo: string | null, rol: Rol = 'directie'): Promise<Blob> {
   const PptxGenJS = (await import('pptxgenjs')).default;
   const pres = new PptxGenJS();
   pres.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 inch
@@ -160,7 +161,7 @@ export async function maakTeamdeck(people: Persoon[], team: string, datum: strin
       s.addText([
         { text: f.vraag, options: { bold: true, color: INK, fontSize: 18, breakLine: true, paraSpaceAfter: 14 } },
         { text: 'Mogelijke afspraak', options: { color: MUTED, fontSize: 12, breakLine: true } },
-        { text: f.afspraak, options: { color: INK, fontSize: 14 } }
+        { text: rolTekst(f.afspraak, rol, false), options: { color: INK, fontSize: 14 } }
       ], { x: x + 0.3, y: 3.0, w: w - 0.6, h: 3.4, margin: 0, isTextBox: true, valign: 'top' });
     });
   }
