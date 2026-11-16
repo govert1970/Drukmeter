@@ -137,3 +137,6 @@ svg.balans { width:100%; height:auto; display:block; }
 .cv-vraag { font-size:27px; font-weight:700; font-variant:small-caps; letter-spacing:.02em; margin:0 0 14px; }
 .page.ext { position:relative; }
 .pg-logo { position:absolute; top:5.5mm; right:16mm; width:11mm; height:auto; }
+
+/* Kleuren altijd meeprinten, ook als "achtergrondafbeeldingen" in het printvenster uit staat */
+.page, .page * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
