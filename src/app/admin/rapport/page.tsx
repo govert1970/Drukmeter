@@ -2,14 +2,14 @@
 import '../../rapport.css';
 import { useEffect, useState } from 'react';
 import { scoreOf, type Persoon } from '@/lib/rapport';
-import { uitgebreideRapportenHtml } from '@/lib/uitgebreid';
+import { uitgebreideRapportenHtml, uitgebreidRapportHtml } from '@/lib/uitgebreid';
 import { rolVan } from '@/lib/rol';
 
 type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean; rol?: string };
 type Deelnemer = { team_id: string; naam: string; antwoorden: string | null; open_antwoord: string; notitie?: string };
 
 export default function Rapport() {
-  const [html, setHtml] = useState('');
+  const [wie, setWie] = useState('');
   const [mensen, setMensen] = useState<Persoon[]>([]);
   const [msg, setMsg] = useState('Laden…');
   const [team, setTeam] = useState<Team | null>(null);
@@ -27,7 +27,6 @@ export default function Rapport() {
       const leden = (d.deelnemers as Deelnemer[]).filter(x => x.team_id === id);
       const people: Persoon[] = leden.filter(x => x.antwoorden).map(x => ({ ...scoreOf({ n: x.naam, a: x.antwoorden!, t: x.open_antwoord }), notitie: x.notitie || '' }));
       setTeam(t); setOpen(leden.length - people.length); setMensen(people);
-      setHtml(uitgebreideRapportenHtml(people, t.naam, t.sessiedatum, t.individueel === true, rolVan(t.rol)));
       setMsg(people.length ? '' : 'Nog niemand heeft de vragenlijst ingevuld.');
     }).catch(() => setMsg('Geen verbinding.'));
   }, []);
@@ -52,19 +51,34 @@ export default function Rapport() {
   }
 
   const solo = team?.individueel === true;
+  const gesorteerd = [...mensen].sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+  const een = gesorteerd.find(m => m.naam === wie);
+  const html = !team ? '' : een
+    ? uitgebreidRapportHtml(een, solo ? [een] : mensen, team.naam, team.sessiedatum, solo, rolVan(team.rol))
+    : uitgebreideRapportenHtml(mensen, team.naam, team.sessiedatum, solo, rolVan(team.rol));
+  function print() {
+    const oud = document.title;
+    document.title = een ? 'Pressure Map - ' + een.naam : 'Pressure Map - ' + (team?.naam || 'rapporten');
+    window.print();
+    setTimeout(() => { document.title = oud; }, 1000);
+  }
   return (
     <>
       <div className="ctrl">
         <h1>Rapportage{team ? ' — ' + team.naam : ''}</h1>
         {open > 0 && <p className="msg">Let op: {open} deelnemer(s) hebben nog niet ingevuld.{solo ? '' : ' Die tellen niet mee in het teambeeld.'}</p>}
         <div className="row">
-          <button onClick={() => window.print()} disabled={!mensen.length}>Print persoonlijke rapporten</button>
+          <select value={wie} onChange={e => setWie(e.target.value)} disabled={!mensen.length}>
+            <option value="">Alle rapporten in één document</option>
+            {gesorteerd.map(m => <option key={m.naam} value={m.naam}>{m.naam}</option>)}
+          </select>
+          <button onClick={print} disabled={!mensen.length}>{een ? 'Print dit rapport' : 'Print persoonlijke rapporten'}</button>
           {!solo && <button onClick={presentatie} disabled={mensen.length < 4 || bezig}>{bezig ? 'Bezig…' : 'Download teampresentatie (.pptx)'}</button>}
           <a href="/admin"><button className="ghost">Terug</button></a>
         </div>
         <p className="msg">{solo ? 'Individueel gebruik: ieder rapport staat op zichzelf, zonder vergelijking met anderen en zonder teambeeld.' : 'Iedere deelnemer krijgt alleen het eigen rapport. Het teambeeld staat in de presentatie, zonder namen en zonder privé.'}</p>
         {!solo && mensen.length > 0 && mensen.length < 4 && <p className="msg">Bij minder dan vier deelnemers is een teambeeld naar personen te herleiden. Daarom is er dan geen presentatie.</p>}
-        <p className="msg">Kies bij printen “Opslaan als PDF”, papierformaat A4, marges “geen”, en zet achtergrondafbeeldingen aan.</p>
+        <p className="msg">Eén rapport per bestand? Kies een naam in de lijst en print; het bestand krijgt dan die naam. Kies bij printen “Opslaan als PDF”, papierformaat A4, marges “geen”, en zet achtergrondafbeeldingen aan.</p>
         {msg && <p className="msg">{msg}</p>}
       </div>
       <div dangerouslySetInnerHTML={{ __html: html }} />
