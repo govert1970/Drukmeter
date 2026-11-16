@@ -3,8 +3,8 @@ import '../rapport.css';
 import { ROLLEN, rolVan } from '@/lib/rol';
 import { useCallback, useEffect, useState } from 'react';
 
-type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean; rol?: string };
-type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null; notitie?: string };
+type Team = { id: string; naam: string; sessiedatum: string; individueel?: boolean; rol?: string; beta?: boolean };
+type Deelnemer = { id: string; team_id: string; naam: string; token: string; ingevuld_op: string | null; notitie?: string; email?: string; telt_mee?: boolean; created_at?: string };
 
 export default function Admin() {
   const [status, setStatus] = useState<'laden' | 'login' | 'ok'>('laden');
@@ -72,12 +72,15 @@ export default function Admin() {
       <div className="row">
         <select value={sel} onChange={e => setSel(e.target.value)} style={{ font: 'inherit', padding: '8px 10px', borderRadius: 8 }}>
           {teams.length === 0 && <option value="">Nog geen teams</option>}
-          {teams.map(t => <option key={t.id} value={t.id}>{t.naam}{t.individueel ? ' (individueel)' : ''}</option>)}
+          {teams.map(t => <option key={t.id} value={t.id}>{t.naam}{t.beta ? '' : t.individueel ? ' (individueel)' : ''}</option>)}
         </select>
         <input value={nieuwTeam} onChange={e => setNieuwTeam(e.target.value)} placeholder={nieuwSolo ? 'Naam van de map, bijv. Coaching 2026' : 'Nieuw team'} />
         <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}><input type="checkbox" checked={nieuwSolo} onChange={e => setNieuwSolo(e.target.checked)} /> Individueel, geen team</label>
         <button className="ghost" onClick={async () => { const d = await post('/api/admin/teams', { naam: nieuwTeam, individueel: nieuwSolo }); if (d) { setNieuwTeam(''); setNieuwSolo(false); setSel(d.id); laad(); } }}>{nieuwSolo ? 'Map toevoegen' : 'Team toevoegen'}</button>
       </div>
+
+      <div className="msg">Beta-aanmeldpagina: <a href="/beta" target="_blank" rel="noopener noreferrer">{location.origin}/beta</a>{' '}
+        <button className="ghost" style={{ padding: '2px 10px' }} onClick={() => kopieer(location.origin + '/beta', 'Link naar de aanmeldpagina')}>Kopieer</button></div>
 
       {team && (
         <>
@@ -94,6 +97,7 @@ export default function Admin() {
               {leden.map(d => (
                 <tr key={d.id}>
                   <td>{d.naam}
+                    {d.email && <div style={{ fontSize: 12 }}><a href={'mailto:' + d.email} style={{ color: 'var(--muted)' }}>{d.email}</a>{d.created_at ? <span style={{ color: 'var(--muted)' }}> · aangemeld {new Date(d.created_at).toLocaleDateString('nl-NL')}</span> : null}</div>}
                     <details style={{ marginTop: 4 }}>
                       <summary style={{ fontSize: 12, color: 'var(--muted)', cursor: 'pointer' }}>{d.notitie ? 'Toelichting ✓' : 'Toelichting toevoegen'}</summary>
                       <textarea defaultValue={d.notitie || ''} placeholder="Persoonlijke toelichting voor het uitgebreide rapport" style={{ minHeight: 70, width: 320, fontFamily: 'inherit', fontSize: 13 }}
@@ -101,6 +105,7 @@ export default function Admin() {
                     </details>
                   </td>
                   <td>{d.ingevuld_op ? <span className="band b-r">ingevuld {new Date(d.ingevuld_op).toLocaleDateString('nl-NL')}</span> : <span className="band b-v">nog niet</span>}</td>
+                  {team.beta && <td style={{ whiteSpace: 'nowrap', fontSize: 12 }}><label style={{ display: 'flex', alignItems: 'center', gap: 5 }} title="Telt mee in de referentiegroep"><input type="checkbox" checked={d.telt_mee !== false} onChange={e => post('/api/admin/deelnemers', { id: d.id, telt_mee: e.target.checked }, 'PATCH').then(laad)} /> telt mee</label></td>}
                   <td style={{ fontSize: 11, wordBreak: 'break-all' }}><a href={link(d.token)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--muted)' }}>{link(d.token)}</a></td>
                   <td style={{ whiteSpace: 'nowrap' }}>
                     <button className="ghost" style={{ padding: '4px 10px' }} onClick={() => kopieer(link(d.token), 'Link van ' + d.naam)}>Kopieer link</button>{' '}
@@ -112,6 +117,7 @@ export default function Admin() {
           </table>
           {leden.length > 0 && <div className="row"><button className="ghost" onClick={() => kopieer(leden.map(d => `${d.naam}: ${link(d.token)}`).join('\n'), 'Alle links')}>Kopieer alle links</button></div>}
 
+          {team.beta && <p className="msg">Beta-map: wie hier staat, ziet na het invullen direct het eigen rapport en telt standaard mee in de referentiegroep. Zet “telt mee” uit bij wie er niet in hoort. Je kunt hier ook zelf namen toevoegen en de link mailen.</p>}
           <h3>Deelnemers toevoegen</h3>
           <textarea value={namen} onChange={e => setNamen(e.target.value)} placeholder={'Eén naam per regel\nAnne de Vries\nBas Jansen'} style={{ minHeight: 90 }} />
           <div className="row"><button className="ghost" onClick={async () => { const d = await post('/api/admin/deelnemers', { team_id: team.id, namen: namen.split('\n') }); if (d) { setNamen(''); laad(); } }}>Toevoegen</button></div>

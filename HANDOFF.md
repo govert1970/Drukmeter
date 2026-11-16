@@ -83,3 +83,12 @@ Dit vervangt de indeling in zes vlakken die hierboven staat.
 
 ## Werkwijze met Govert
 Schrijf in het Nederlands, direct en zonder omhaal. Maak kleine, gerichte wijzigingen en herstructureer niet zonder dat hij erom vraagt. Laat resultaten zien (PDF of screenshots) in plaats van ze te beschrijven. De klantdata is vertrouwelijk, dus de repo moet private blijven.
+
+## Beta-aanmelding (16 november 2026)
+- **`/beta` is de open aanmeldpagina**, bedoeld als link onder LinkedIn-posts. Naam, e-mail en soort rol; daarna direct de vragenlijst en direct het eigen rapport op `/p/<token>/rapport`, met een knop om het als PDF te bewaren. Er gaat geen mail naar de deelnemer: wie het rapport later wil terugzien, bewaart de PDF of de link.
+- Aanmelders komen in een map die vanzelf ontstaat, één per soort rol ("Beta · Directie of executive" enzovoort). `dm_teams.beta` markeert die mappen. Govert kan er ook zelf namen aan toevoegen en de link mailen (bijvoorbeeld aan lezers die op de nieuwsbrief antwoorden): alles in een beta-map werkt hetzelfde.
+- **De beta is een ruil:** de deelnemer krijgt het rapport, de antwoorden tellen naamloos mee in de referentiegroep. Dat staat in twee zinnen op `/beta` en in de inleiding van de vragenlijst. Er is geen vinkje: meedoen is instemmen. Bij teams blijft het vinkje van de deelnemer bestaan.
+- **"Telt mee" op `/admin`** staat in een beta-map standaard aan. Uitzetten haalt de naamloze rij uit `dm_referentie` (via `dm_deelnemers.referentie_id`), aanzetten zet hem terug. Naam en e-mail staan alleen in `dm_deelnemers`.
+- Een beta-deelnemer kan de vragenlijst één keer invullen; daarna toont de link het rapport.
+- **Melding per aanmelding** gaat via Resend en alleen als `RESEND_API_KEY` en `MELD_EMAIL` in Vercel staan. Zonder die twee staat de aanmelding alleen op `/admin` (met e-mailadres en datum).
+- Database: de vier nieuwe kolommen staan onderaan `supabase/schema.sql`. Zonder die regels werken teams en bestaande links gewoon door, maar `/beta` geeft dan een foutmelding.

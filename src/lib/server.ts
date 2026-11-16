@@ -56,3 +56,22 @@ export function isAdmin(): boolean {
   const b = Buffer.from(handtekening());
   return a.length === b.length && timingSafeEqual(a, b);
 }
+
+// Melding aan de facilitator, via Resend. Zonder RESEND_API_KEY en MELD_EMAIL gebeurt er niets:
+// de aanmelding staat dan alleen op /admin.
+export async function meld(onderwerp: string, tekst: string, antwoordAan?: string) {
+  const key = process.env.RESEND_API_KEY?.trim();
+  const aan = process.env.MELD_EMAIL?.trim();
+  if (!key || !aan) return;
+  try {
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        from: process.env.MELD_FROM?.trim() || 'Pressure Map <onboarding@resend.dev>',
+        to: [aan], subject: onderwerp, text: tekst, ...(antwoordAan ? { reply_to: antwoordAan } : {}),
+      }),
+      signal: AbortSignal.timeout(4000),
+    });
+  } catch { /* een mislukte melding mag de aanmelding niet tegenhouden */ }
+}
