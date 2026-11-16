@@ -74,6 +74,7 @@ export default function Rapport() {
           </select>
           <button onClick={print} disabled={!mensen.length}>{een ? 'Print dit rapport' : 'Print persoonlijke rapporten'}</button>
           {!solo && <button onClick={presentatie} disabled={mensen.length < 4 || bezig}>{bezig ? 'Bezig…' : 'Download teampresentatie (.pptx)'}</button>}
+          {!solo && team && <a href={'/admin/poster?team=' + team.id}><button className="ghost" disabled={mensen.length < 4}>Teamkaart A3</button></a>}
           <a href="/admin"><button className="ghost">Terug</button></a>
         </div>
         <p className="msg">{solo ? 'Individueel gebruik: ieder rapport staat op zichzelf, zonder vergelijking met anderen en zonder teambeeld.' : 'Iedere deelnemer krijgt alleen het eigen rapport. Het teambeeld staat in de presentatie, zonder namen en zonder privé.'}</p>
