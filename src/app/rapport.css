@@ -137,3 +137,10 @@ svg.balans { width:100%; height:auto; display:block; }
 .cv-vraag { font-size:27px; font-weight:700; font-variant:small-caps; letter-spacing:.02em; margin:0 0 14px; }
 .page.ext { position:relative; }
 .pg-logo { position:absolute; top:5.5mm; right:16mm; width:11mm; height:auto; }
+
+/* Eigen rapport van een beta-deelnemer: leesbaar op een telefoon. De print blijft A4. */
+@media screen and (max-width:840px) {
+  .zelf .ctrl { margin:10px 8px; padding:16px; }
+  .zelf .page { width:auto; min-height:0; margin:10px 8px; padding:22px 16px 18px; overflow:hidden; }
+  .zelf .page.cover, .zelf .pg-logo, .zelf .page .foot { display:none; } /* voorblad, logo en voetregel staan wel in de PDF */
+}

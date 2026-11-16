@@ -22,11 +22,14 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
   const [mist, setMist] = useState<string[]>([]);
   const [bezig, setBezig] = useState(false);
   const [ref, setRef] = useState(false);
+  const [beta, setBeta] = useState(false);
 
   useEffect(() => {
     fetch(`/api/p/${params.token}`).then(async r => {
       const d = await r.json();
       if (!r.ok) { setFout(d.fout || 'Deze link klopt niet.'); setFase('fout'); return; }
+      if (d.beta && d.ingevuld) { location.replace(`/p/${params.token}/rapport`); return; }
+      setBeta(d.beta === true);
       setNaam(d.naam); setEerder(d.ingevuld); setSolo(d.individueel === true); setRol(rolVan(d.rol)); setFase('intro');
     }).catch(() => { setFout('Geen verbinding. Probeer het later nog eens.'); setFase('fout'); });
   }, [params.token]);
@@ -46,6 +49,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
       const r = await fetch(`/api/p/${params.token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ a: ITEMS.map(it => ant[it.id]).join(''), t: open, r: ref }) });
       const d = await r.json();
       if (!r.ok) { setFout(d.fout || 'Versturen lukte niet. Probeer het nog een keer.'); setBezig(false); return; }
+      if (beta) { location.href = `/p/${params.token}/rapport`; return; }
       setFase('klaar'); window.scrollTo(0, 0);
     } catch {
       setFout('Geen verbinding. Je antwoorden staan nog op het scherm: probeer het zo nog een keer.');
@@ -66,7 +70,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
           <p>Hoi {naam.split(' ')[0]}. {opening(rol, solo)} Deze vragenlijst gaat dus niet over óf je druk ervaart, maar over <b>waar</b> die zich ophoopt en of je herstel het bijhoudt.</p>
           <div className="card small">
             <p style={{ marginTop: 0 }}><b>Wat het is, en wat niet.</b> Dit is een gespreksinstrument, geen gevalideerde test. Het geeft een beeld, geen oordeel. Er zijn geen goede of foute antwoorden.</p>
-            <p><b>Wie ziet wat.</b> Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. {solo ? 'Dat is alleen voor jou; niemand anders krijgt het te zien. We bespreken het samen.' : 'Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.'}</p>
+            <p><b>Wie ziet wat.</b> {beta ? 'Je vult de Pressure Map in en krijgt direct je persoonlijke rapport. In ruil daarvoor tellen je antwoorden anoniem mee in de referentiegroep waarmee ik het instrument verder bouw. Govert van Sandwijk ziet je antwoorden; je rapport is alleen voor jou.' : <>Govert van Sandwijk ziet je antwoorden en maakt er een persoonlijk profiel van. {solo ? 'Dat is alleen voor jou; niemand anders krijgt het te zien. We bespreken het samen.' : 'Dat krijg jij in de sessie. Het team ziet alleen totaalcijfers, nooit jouw individuele scores. Wat je over privé invult, komt alleen in je eigen rapport.'}</>}</p>
             <p style={{ marginBottom: 0 }}><b>Hoe.</b> {ORDER.length} korte vragen, ongeveer 10 minuten. De laatste zes gaan over privé. Denk aan de afgelopen vier weken. Kies wat het eerst bij je opkomt.</p>
           </div>
           {eerder && <p className="small muted">Je hebt de vragenlijst al eens ingevuld. Als je hem opnieuw invult, tellen je nieuwe antwoorden.</p>}
@@ -97,9 +101,9 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
             <p>Tot slot, als je wilt: wat kost je op dit moment de meeste energie?</p>
             <textarea maxLength={200} placeholder="Optioneel, maximaal 200 tekens" value={open} onChange={e => setOpen(e.target.value)} />
           </div>
-          <label className="toest"><input type="checkbox" checked={ref} onChange={e => setRef(e.target.checked)} />
-            <span>Mijn antwoorden mogen zonder naam worden bewaard om deze vragenlijst te verbeteren. Niet mijn naam, {solo ? 'mijn organisatie' : 'mijn team'} of wat ik hierboven schreef. Dit is niet verplicht.</span></label>
-          <div className="row"><button className="primary" disabled={bezig} onClick={versturen}>{bezig ? 'Versturen…' : 'Versturen'}</button></div>
+          {!beta && <label className="toest"><input type="checkbox" checked={ref} onChange={e => setRef(e.target.checked)} />
+            <span>Mijn antwoorden mogen zonder naam worden bewaard om deze vragenlijst te verbeteren. Niet mijn naam, {solo ? 'mijn organisatie' : 'mijn team'} of wat ik hierboven schreef. Dit is niet verplicht.</span></label>}
+          <div className="row"><button className="primary" disabled={bezig} onClick={versturen}>{bezig ? 'Versturen…' : beta ? 'Versturen en rapport bekijken' : 'Versturen'}</button></div>
           {fout && <div className="err">{fout}</div>}
         </section>
       )}
