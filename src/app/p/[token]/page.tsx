@@ -21,7 +21,6 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
   const [open, setOpen] = useState('');
   const [mist, setMist] = useState<string[]>([]);
   const [bezig, setBezig] = useState(false);
-  const [ref, setRef] = useState(false);
 
   useEffect(() => {
     fetch(`/api/p/${params.token}`).then(async r => {
@@ -43,7 +42,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
     }
     setBezig(true); setFout('');
     try {
-      const r = await fetch(`/api/p/${params.token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ a: ITEMS.map(it => ant[it.id]).join(''), t: open, r: ref }) });
+      const r = await fetch(`/api/p/${params.token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ a: ITEMS.map(it => ant[it.id]).join(''), t: open }) });
       const d = await r.json();
       if (!r.ok) { setFout(d.fout || 'Versturen lukte niet. Probeer het nog een keer.'); setBezig(false); return; }
       setFase('klaar'); window.scrollTo(0, 0);
@@ -97,8 +96,7 @@ export default function Vragenlijst({ params }: { params: { token: string } }) {
             <p>Tot slot, als je wilt: wat kost je op dit moment de meeste energie?</p>
             <textarea maxLength={200} placeholder="Optioneel, maximaal 200 tekens" value={open} onChange={e => setOpen(e.target.value)} />
           </div>
-          <label className="toest"><input type="checkbox" checked={ref} onChange={e => setRef(e.target.checked)} />
-            <span>Mijn antwoorden mogen zonder naam worden bewaard om deze vragenlijst te verbeteren. Niet mijn naam, {solo ? 'mijn organisatie' : 'mijn team'} of wat ik hierboven schreef. Dit is niet verplicht.</span></label>
+          <p className="muted" style={{ fontSize: 13 }}>Je antwoorden op de vragen worden ook zonder naam bewaard, om deze vragenlijst te verbeteren en een referentiegroep op te bouwen. Daarbij staat niet je naam, {solo ? 'je organisatie' : 'je team'} of wat je hierboven schreef.</p>
           <div className="row"><button className="primary" disabled={bezig} onClick={versturen}>{bezig ? 'Versturen…' : 'Versturen'}</button></div>
           {fout && <div className="err">{fout}</div>}
         </section>
